@@ -8,12 +8,9 @@ namespace HeartyHearthWinForm
         public frmRecipes()
         {
             InitializeComponent();
-            btnSave.Click += BtnSave_Click;
-            btnDelete.Click += BtnDelete_Click;
+            //btnSave.Click += BtnSave_Click;
+            //btnDelete.Click += BtnDelete_Click;
         }
-
-
-
         public void ShowForm(int recipeid)
         {
             string sql = "select r.RecipeName, ct.CuisineName, r.Calories, r.ImagePath, r.RecipeStatus, r.Drafted, r.Archived, " +
@@ -34,7 +31,7 @@ namespace HeartyHearthWinForm
             this.Show();
         }
 
-        private void Save()
+        /*private void Save()
         {
             SQLUtility.DebugPrintDataTable(dtRecipe);
 
@@ -53,5 +50,6 @@ namespace HeartyHearthWinForm
         {
             Save();
         }
+        */
     }
 }
