@@ -31,12 +31,11 @@ namespace HeartyHearthWinForm
         private void GRecipes_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
         {
             int id = (int)gRecipes.Rows[e.RowIndex].Cells["RecipeId"].Value;
-            frmRecipes frm = new();
+            frmRecipeInfo frm = new();
             frm.ShowForm(id);
         }
         private void BtnSearch_Click(object? sender, EventArgs e)
         {
-            
             SearchForRecipe(txtRecipe.Text);
         }
 
@@ -45,7 +44,9 @@ namespace HeartyHearthWinForm
             string sql = "select RecipeId, RecipeName from Recipe r where r.RecipeName like '%" + recipe + "%'";
             DataTable dt = SQLUtility.GetDataTable(sql);
             gRecipes.DataSource = dt;
+            gRecipes.Columns[0].Visible = false;
             return dt;
+            
         }
     }
 }

@@ -2,10 +2,10 @@
 using CPUFramework;
 namespace HeartyHearthWinForm
 {
-    public partial class frmRecipes : Form
+    public partial class frmRecipeInfo : Form
     {
         DataTable dtRecipe;
-        public frmRecipes()
+        public frmRecipeInfo()
         {
             InitializeComponent();
             //btnSave.Click += BtnSave_Click;
@@ -20,7 +20,6 @@ namespace HeartyHearthWinForm
             txtRecipeName.DataBindings.Add("Text", dtRecipe, "RecipeName");
             txtCuisineName.DataBindings.Add("Text", dtRecipe, "CuisineName");
             txtCalories.DataBindings.Add("Text", dtRecipe, "Calories");
-            lblImagePath.DataBindings.Add("Text", dtRecipe, "ImagePath");
             lblRecipeStatus.DataBindings.Add("Text", dtRecipe, "RecipeStatus");
             txtDrafted.DataBindings.Add("Text", dtRecipe, "Drafted");
             txtPublished.DataBindings.Add("Text", dtRecipe, "Published");
