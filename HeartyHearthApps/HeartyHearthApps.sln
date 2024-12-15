@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPUFramework", "..\..\CPUFr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeartyHearthWinForm", "HeartyHearthWinForm\HeartyHearthWinForm.csproj", "{16F69F57-3E9E-42E6-A33A-F595CE51D15B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPUWindowFormsFramework", "..\..\CPUWindowsFormFramework\CPUWindowFormsFramework.csproj", "{9E123346-9659-4574-99C7-BF969603CDA7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{16F69F57-3E9E-42E6-A33A-F595CE51D15B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{16F69F57-3E9E-42E6-A33A-F595CE51D15B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{16F69F57-3E9E-42E6-A33A-F595CE51D15B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E123346-9659-4574-99C7-BF969603CDA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E123346-9659-4574-99C7-BF969603CDA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E123346-9659-4574-99C7-BF969603CDA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E123346-9659-4574-99C7-BF969603CDA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

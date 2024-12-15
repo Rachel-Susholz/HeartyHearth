@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using CPUFramework;
+using CPUWindowFormsFramework;
 
 namespace HeartyHearthWinForm
 {
@@ -18,31 +19,42 @@ namespace HeartyHearthWinForm
         {
             InitializeComponent();
             btnSearch.Click += BtnSearch_Click;
+            btnNew.Click += BtnNew_Click;
             gRecipes.CellDoubleClick += GRecipes_CellDoubleClick;
-            FormatGrid();
+            WindowsFormsUtility.FormatGridForSearchResults(gRecipes);
         }
-        private void FormatGrid()
-        {
-            gRecipes.AllowUserToAddRows = false;
-            gRecipes.ReadOnly = true;
-            gRecipes.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
-            gRecipes.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        }
+
+        
+
         private void GRecipes_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
         {
-            int id = (int)gRecipes.Rows[e.RowIndex].Cells["RecipeId"].Value;
-            frmRecipeInfo frm = new();
-            frm.ShowForm(id);
+            ShowRecipeForm(e.RowIndex);
         }
         private void BtnSearch_Click(object? sender, EventArgs e)
         {
             SearchForRecipe(txtRecipe.Text);
         }
 
+        private void BtnNew_Click(object? sender, EventArgs e)
+        {
+            ShowRecipeForm(-1); 
+        }
+
+        private void ShowRecipeForm(int rowindex)
+        {
+            int id = 0;
+            if (rowindex > -1)
+            {
+                id = (int)gRecipes.Rows[rowindex].Cells["RecipeId"].Value;
+            }
+            
+            frmRecipeInfo frm = new();
+            frm.ShowForm(id);
+        }
         private DataTable SearchForRecipe(string recipe)
         {
             string sql = "select RecipeId, RecipeName from Recipe r where r.RecipeName like '%" + recipe + "%'";
-            DataTable dt = SQLUtility.GetDataTable(sql);
+            DataTable dt = SQLUtility.ExecuteSQL(sql);
             gRecipes.DataSource = dt;
             gRecipes.Columns[0].Visible = false;
             return dt;

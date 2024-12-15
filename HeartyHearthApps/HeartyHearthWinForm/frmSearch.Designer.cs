@@ -34,6 +34,7 @@
             lblRecipe = new Label();
             btnSearch = new Button();
             gRecipes = new DataGridView();
+            btnNew = new Button();
             tblMain.SuspendLayout();
             tblControls.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gRecipes).BeginInit();
@@ -56,19 +57,20 @@
             // 
             // tblControls
             // 
-            tblControls.AutoSize = true;
-            tblControls.ColumnCount = 3;
+            tblControls.ColumnCount = 4;
+            tblControls.ColumnStyles.Add(new ColumnStyle());
             tblControls.ColumnStyles.Add(new ColumnStyle());
             tblControls.ColumnStyles.Add(new ColumnStyle());
             tblControls.ColumnStyles.Add(new ColumnStyle());
             tblControls.Controls.Add(txtRecipe, 1, 0);
             tblControls.Controls.Add(lblRecipe, 0, 0);
             tblControls.Controls.Add(btnSearch, 2, 0);
+            tblControls.Controls.Add(btnNew, 3, 0);
             tblControls.Location = new Point(3, 3);
             tblControls.Name = "tblControls";
             tblControls.RowCount = 1;
             tblControls.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tblControls.Size = new Size(275, 36);
+            tblControls.Size = new Size(342, 36);
             tblControls.TabIndex = 0;
             // 
             // txtRecipe
@@ -112,6 +114,17 @@
             gRecipes.Size = new Size(794, 402);
             gRecipes.TabIndex = 1;
             // 
+            // btnNew
+            // 
+            btnNew.AutoSize = true;
+            btnNew.Dock = DockStyle.Fill;
+            btnNew.Location = new Point(278, 3);
+            btnNew.Name = "btnNew";
+            btnNew.Size = new Size(61, 30);
+            btnNew.TabIndex = 3;
+            btnNew.Text = "New";
+            btnNew.UseVisualStyleBackColor = true;
+            // 
             // frmSearch
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -121,7 +134,6 @@
             Name = "frmSearch";
             Text = "HeartyHearth Search";
             tblMain.ResumeLayout(false);
-            tblMain.PerformLayout();
             tblControls.ResumeLayout(false);
             tblControls.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)gRecipes).EndInit();
@@ -136,5 +148,6 @@
         private Label lblRecipe;
         private Button btnSearch;
         private DataGridView gRecipes;
+        private Button btnNew;
     }
 }
