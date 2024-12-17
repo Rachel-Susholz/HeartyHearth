@@ -47,7 +47,7 @@ namespace RecipeTest
             DataRow r = dt.Rows[0];
             Console.WriteLine($"RecipeId: {r["RecipeId"]}");
             Console.WriteLine($"RecipeName: {r["RecipeName"]}");
-            Assert.IsTrue((int)r["RecipeId"] == recipeId, "State After Test: RecipeId should match.");
+            Assert.IsTrue((int)r["RecipeId"] == recipeId, "State After Test: RecipeId should match " + recipeId);
         }
 
         [Test]
@@ -56,35 +56,30 @@ namespace RecipeTest
             // Arrange
             string uniqueName = "TestRecipe_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
             TestContext.WriteLine($"Inserting recipe with unique name: {uniqueName}");
+
             DataTable dt = recipe.Load(0); // Load an empty DataTable for a new recipe.
             dt.Rows.Add();
             DataRow row = dt.Rows[0];
             row["RecipeName"] = uniqueName;
             row["CuisineTypeId"] = TestHelper.GetValidCuisineTypeId();
-            row["Calories"] = 200; 
+            row["Calories"] = 200;
             row["Drafted"] = DateTime.Now;
             row["StaffMemberId"] = TestHelper.GetValidStaffMemberId();
+
             // Act
             recipe.Save(dt);
 
-            // Reload by finding the newest recipe added.
+            // Reload the most recent recipe
             DataTable allRecipes = recipe.Load(TestHelper.GetMaxRecipeId());
-            DataRow insertedRow = null;
-
-            foreach (DataRow recipe in allRecipes.Rows)
-            {
-                if (recipe["RecipeName"].ToString() == uniqueName)
-                {
-                    insertedRow = recipe;
-                    break;
-                }
-            }
 
             // Assert
+            DataRow insertedRow = allRecipes.Rows[0]; 
             Assert.IsTrue(insertedRow != null, "The inserted recipe should exist in the database.");
             Assert.IsTrue(insertedRow["RecipeName"].ToString() == uniqueName, "Recipe name should match the unique name.");
-            TestContext.WriteLine($"Successfully nserted RecipeName: {uniqueName}");
+            TestContext.WriteLine($"Successfully inserted RecipeName: {uniqueName}");
         }
+
+
 
 
         [Test]
