@@ -62,11 +62,10 @@ public partial class frmRecipeInfo : Form
         }
         else // Insert new recipe
         {
-            sql = "insert into recipe (RecipeName, CuisineTypeId, Calories, RecipeStatus, Drafted, Published, Archived, StaffMemberId) " +
+            sql = "insert into recipe (RecipeName, CuisineTypeId, Calories, Drafted, Published, Archived, StaffMemberId) " +
                   $"values ('{r["RecipeName"] ?? ""}', " +
                   $"{(r["CuisineTypeId"] == DBNull.Value ? "NULL" : r["CuisineTypeId"])}, " +
                   $"{(r["Calories"] == DBNull.Value ? 0 : r["Calories"])}, " +
-                  $"'{r["RecipeStatus"] ?? ""}', " +
                   $"{(r["Drafted"] == DBNull.Value ? "NULL" : $"'{r["Drafted"]}'")}, " +
                   $"{(r["Published"] == DBNull.Value ? "NULL" : $"'{r["Published"]}'")}, " +
                   $"{(r["Archived"] == DBNull.Value ? "NULL" : $"'{r["Archived"]}'")}, " +
