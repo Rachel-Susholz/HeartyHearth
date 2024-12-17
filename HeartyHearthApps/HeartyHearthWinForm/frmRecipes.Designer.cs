@@ -195,6 +195,7 @@
             // 
             // lblPublished
             // 
+            lblPublished.BorderStyle = BorderStyle.FixedSingle;
             lblPublished.Location = new Point(403, 235);
             lblPublished.Name = "lblPublished";
             lblPublished.Size = new Size(125, 38);
@@ -203,6 +204,7 @@
             // 
             // lblArchived
             // 
+            lblArchived.BorderStyle = BorderStyle.FixedSingle;
             lblArchived.Location = new Point(403, 282);
             lblArchived.Name = "lblArchived";
             lblArchived.Size = new Size(125, 38);

@@ -54,9 +54,9 @@ namespace HeartyHearthWinForm
         private DataTable SearchForRecipe(string recipe)
         {
             string sql = "select RecipeId, RecipeName from Recipe r where r.RecipeName like '%" + recipe + "%'";
-            DataTable dt = SQLUtility.ExecuteSQL(sql);
+            DataTable dt = SQLUtility.GetDataTable(sql);
             gRecipes.DataSource = dt;
-            gRecipes.Columns[0].Visible = false;
+            gRecipes.Columns["RecipeId"].Visible = false;
             return dt;
             
         }

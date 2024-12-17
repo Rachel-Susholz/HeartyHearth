@@ -33,7 +33,7 @@ create table dbo.StaffMember(
 
 -- CuisineType Table
 create table dbo.CuisineType(
-    CuisineId int not null identity primary key,
+    CuisineTypeId int not null identity primary key,
     CuisineName varchar(50) unique not null
         constraint ck_CuisineName_cannot_be_blank check (CuisineName <> '')
 )
@@ -49,7 +49,7 @@ create table dbo.Ingredient(
 -- Recipe Table
 create table dbo.Recipe(
     RecipeId int not null identity primary key,
-    CuisineId int not null 
+    CuisineTypeId int not null 
         constraint f_Cuisine_Recipe foreign key references CuisineType(CuisineId),
     RecipeName varchar(150) unique not null
         constraint ck_RecipeName_cannot_be_blank check (RecipeName <> ''),

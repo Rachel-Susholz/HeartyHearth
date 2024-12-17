@@ -14,8 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\CPUFramework\CPUFramework.csproj" />
-    <ProjectReference Include="..\..\..\CPUWindowFormsFramework\CPUWindowsFormFramework.csproj" />
-    <ProjectReference Include="..\..\..\CPUWindowsFormFramework\CPUWindowFormsFramework.csproj" />
+    <ProjectReference Include="..\..\..\CPUWindowFormsFramework\CPUWindowFormsFramework.csproj" />
   </ItemGroup>
 
 </Project>
