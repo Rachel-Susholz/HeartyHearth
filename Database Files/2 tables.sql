@@ -50,7 +50,7 @@ create table dbo.Ingredient(
 create table dbo.Recipe(
     RecipeId int not null identity primary key,
     CuisineTypeId int not null 
-        constraint f_Cuisine_Recipe foreign key references CuisineType(CuisineId),
+        constraint f_Cuisine_Recipe foreign key references CuisineType(CuisineTypeId),
     RecipeName varchar(150) unique not null
         constraint ck_RecipeName_cannot_be_blank check (RecipeName <> ''),
     Calories int not null

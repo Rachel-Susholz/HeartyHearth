@@ -8,8 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using CPUFramework;
-using CPUWindowFormsFramework;
 
 namespace HeartyHearthWinForm
 {
@@ -51,10 +49,9 @@ namespace HeartyHearthWinForm
             frmRecipeInfo frm = new();
             frm.ShowForm(id);
         }
-        private DataTable SearchForRecipe(string recipe)
+        private DataTable SearchForRecipe(string recipename)
         {
-            string sql = "select RecipeId, RecipeName from Recipe r where r.RecipeName like '%" + recipe + "%'";
-            DataTable dt = SQLUtility.GetDataTable(sql);
+            DataTable dt = recipe.SearchRecipes(recipename);
             gRecipes.DataSource = dt;
             gRecipes.Columns["RecipeId"].Visible = false;
             return dt;
