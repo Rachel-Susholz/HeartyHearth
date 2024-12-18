@@ -63,7 +63,7 @@ create table dbo.Recipe(
             else 'drafted'
         end
     ),
-    Drafted datetime default getdate() not null 
+    Drafted datetime default getdate() 
         constraint ck_must_be_drafted_on_past_or_present_date check (drafted <= getdate()),
     Published datetime
         constraint ck__must_be_published_on_past_or_present_date check (published <= getdate()),

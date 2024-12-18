@@ -79,7 +79,7 @@ with x as (
     union select 'Italian', 'Spaghetti Carbonara', 400, 'jdoe', '2024-01-20', '2024-02-05', null
     union select 'Mexican', 'Tacos al Pastor', 350, 'asmith', '2024-01-25', null, null
     union select 'Italian', 'Caprese Salad', 200, 'mjohnson', '2024-02-01', null, '2024-02-15'
-    union select 'Italian', 'Garlic Knots', 200, 'jdoe', '2024-12-15', null, null
+    union select 'Italian', 'Garlic Knots', 200, 'jdoe', '2024-12-15', null,  null
     union select 'American', 'Apple Pie', 450, 'asmith', '2023-12-15', '2024-02-07', null
 )
 insert Recipe(CuisineTypeId, RecipeName, Calories, StaffMemberId, Drafted,Published, Archived)
@@ -283,3 +283,5 @@ join Cookbook c
 on c.CookbookName = x.CookbookName
 join Recipe r 
 on r.RecipeName = x.RecipeName
+
+
