@@ -15,7 +15,7 @@ namespace HeartyHearthSystem
         {
             DataTable dt = new();
 
-            SqlCommand cmd = SQLUtility.GetSqlCommand("RecipeGet");
+            SqlCommand cmd = SQLUtility.GetSqlCommand("RecipeNameAndIdGet");
 
             cmd.Parameters["@RecipeName"].Value = recipename;
 
@@ -25,6 +25,7 @@ namespace HeartyHearthSystem
         }
         public static DataTable Load(int recipeid)
         {
+
             DataTable dt = new();
 
             SqlCommand cmd = SQLUtility.GetSqlCommand("RecipeGet");
