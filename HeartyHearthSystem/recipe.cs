@@ -9,6 +9,10 @@
             SqlCommand cmd = SQLUtility.GetSqlCommand("RecipeNameAndIdGet");
 
             cmd.Parameters["@RecipeName"].Value = recipename;
+            if (recipename == "")
+            {
+                cmd.Parameters["@All"].Value = 1;
+            }
 
             dt = SQLUtility.GetDataTable(cmd);
 

@@ -13,5 +13,11 @@ namespace HeartyHearthSystem
         {
             SQLUtility.ConnectionString = connectionstring;
         }
+
+
+        public static string GetConnectionString()
+        {
+            return SQLUtility.ConnectionString;
+        }
     }
 }

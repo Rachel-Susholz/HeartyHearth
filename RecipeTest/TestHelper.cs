@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,9 +39,21 @@ namespace RecipeTest
         {
             return GetMaxId("recipe", "StaffmemberId");
         }
-
-        
-
+        public static string GetFirstColumnFirstRowValueAsString(string query)
+        {
+            string result = "";
+            using (SqlConnection conn = new(SQLUtility.ConnectionString))
+            {
+                conn.Open();
+                SqlCommand command = new SqlCommand(query, conn);
+                SqlDataReader dr = command.ExecuteReader();
+                if (dr.Read())
+                {
+                    result = dr[0].ToString();
+                }
+            }
+            return result;
+        }
     }
-    }
+}
 

@@ -8,7 +8,7 @@ namespace RecipeTest
         [SetUp]
         public void SetConnectionString()
         {
-            DBManager.SetConnectionString("Server=tcp:dev-rochelsusholz.database.windows.net,1433; Initial Catalog=HeartyHearthDB;Persist Security Info=False;User ID=rsadmin;Password=Rochel@9225; MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30");
+           DBManager.SetConnectionString("Server=tcp:dev-rochelsusholz.database.windows.net,1433; Initial Catalog=HeartyHearthDB;Persist Security Info=False;User ID=rsadmin;Password=Rochel@9225; MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30");
         }
 
             [Test]
@@ -79,6 +79,30 @@ namespace RecipeTest
             TestContext.WriteLine($"Successfully inserted RecipeName: {uniqueName}");
         }
 
+        [Test]
+        public void InsertRecipe_WithExistingName()
+        {
+            // Arrange
+   
+            string existingName = TestHelper.GetFirstColumnFirstRowValueAsString("select top 1 r.RecipeName from recipe r");
+            TestContext.WriteLine($"Inserting recipe with existing name: {existingName}");
+
+            DataTable newdt = recipe.Load(0); // Load an empty DataTable for a new recipe.
+            newdt.Rows.Add();
+            DataRow row = newdt.Rows[0];
+            row["RecipeName"] = existingName;
+            row["CuisineId"] = TestHelper.GetValidCuisineId();
+            row["Calories"] = 200;
+            row["Drafted"] = DateTime.Now;
+            row["StaffMemberId"] = TestHelper.GetValidStaffMemberId();
+
+
+            //Assert
+            Exception ex = Assert.Throws<Exception>(() => recipe.Save(newdt));
+
+            Console.WriteLine(ex.Message);
+        }
+
 
 
 
@@ -102,6 +126,31 @@ namespace RecipeTest
             Console.WriteLine($"After Test: Recipe deleted with RecipeId: {recipeId}");
             Assert.IsTrue(checkdt.Rows.Count == 0, "State After Test: Recipe should be deleted.");
         }
+
+        public void TestDeleteRecipeWithRelatedRecords()
+
+        {
+            // Arrange
+            DataTable dt = SQLUtility.GetDataTable("select top 1 r.RecipeId, r.RecipeName from Recipe r join RecipeIngredient ri on r.RecipeId = ri.RecipeId");
+            int recipeId = TestHelper.GetMaxRecipeId();
+            string recipename = "";
+            if (dt.Rows.Count > 0)
+            {
+                recipeId = (int)dt.Rows[0]["RecipeId"];
+                recipename = dt.Rows[0]["RecipeName"].ToString();
+            }
+            Assume.That(recipeId > 0, "no recipes with ingredients in DB, can't run test");
+            Console.WriteLine($"Ensure that cannot delete recipe with RecipeId: {recipeId}");
+            
+
+            //Assert
+            Exception ex = Assert.Throws<Exception>(() => recipe.Delete(dt));
+         
+            Console.WriteLine(ex.Message);
+          
+        }
+        
+
 
 
         [Test]
@@ -146,7 +195,7 @@ namespace RecipeTest
             int recipeId = TestHelper.GetMaxRecipeId(); 
             DataTable dtRecipe = recipe.Load(recipeId);
             string originalRecipeName = dtRecipe.Rows[0]["RecipeName"].ToString();
-            string updatedRecipeName = originalRecipeName + "_Updated";
+            string updatedRecipeName =  originalRecipeName + "_updated";
 
             // Log current state
             TestContext.WriteLine($"Original Recipe Name Before Test: {originalRecipeName}");
@@ -162,6 +211,24 @@ namespace RecipeTest
             Assert.IsTrue(newRecipeName == updatedRecipeName, "Recipe name was not updated correctly.");
         }
 
+        [Test]
+        public void UpdateRecipeNameToBlankTest()
+        {
+           
+            int recipeId = TestHelper.GetMaxRecipeId();
+            DataTable dtRecipe = recipe.Load(recipeId);
+            string originalRecipeName = dtRecipe.Rows[0]["RecipeName"].ToString();
+            string updatedRecipeName = "";
+
+            // Log current state
+            TestContext.WriteLine($"Original Recipe Name Before Test: {originalRecipeName}");
+            TestContext.WriteLine($"Change Name To: {updatedRecipeName}");
+
+            dtRecipe.Rows[0]["RecipeName"] = updatedRecipeName;
+            Exception ex = Assert.Throws<Exception>(() => recipe.Save(dtRecipe));
+
+            Console.WriteLine(ex.Message);
+        }
 
         [Test]
         public void ChangeCuisineTypeTest()
@@ -232,6 +299,9 @@ namespace RecipeTest
             TestContext.WriteLine($"After Test: Updated StaffMemberId: {updatedStaffMemberId}");
             Assert.IsTrue(updatedStaffMemberId == newStaffMemberId, "User name was not updated correctly.");
         }
+
+
+
 
 
     }
