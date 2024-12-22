@@ -61,7 +61,7 @@ namespace RecipeTest
             dt.Rows.Add();
             DataRow row = dt.Rows[0];
             row["RecipeName"] = uniqueName;
-            row["CuisineTypeId"] = TestHelper.GetValidCuisineTypeId();
+            row["CuisineId"] = TestHelper.GetValidCuisineId();
             row["Calories"] = 200;
             row["Drafted"] = DateTime.Now;
             row["StaffMemberId"] = TestHelper.GetValidStaffMemberId();
@@ -118,7 +118,7 @@ namespace RecipeTest
                 Assert.IsTrue(dt.Rows.Count > 0, "Desired Outcome: There should be cuisines available.");
                 foreach (DataRow row in dt.Rows)
                 {
-                    Console.WriteLine($"CuisineTypeId: {row["CuisineTypeId"]}, CuisineName: {row["CuisineName"]}");
+                    Console.WriteLine($"CuisineId: {row["CuisineId"]}, CuisineName: {row["CuisineName"]}");
                 }
             }
 
@@ -169,21 +169,21 @@ namespace RecipeTest
             // Arrange
             int recipeId = TestHelper.GetMaxRecipeId();
             DataTable dtRecipe = recipe.Load(recipeId);
-            int originalCuisineTypeId = (int)dtRecipe.Rows[0]["CuisineTypeId"];
-            int newCuisineTypeId = 2; // Assuming 2 is a valid CuisineTypeId.
+            int originalCuisineId = (int)dtRecipe.Rows[0]["CuisineId"];
+            int newCuisineId = TestHelper.GetValidCuisineId();
 
             // Log current state
-            TestContext.WriteLine($"Before Test: Original CuisineTypeId: {originalCuisineTypeId}");
+            TestContext.WriteLine($"Before Test: Original CuisineId: {originalCuisineId}");
 
             // Act
-            dtRecipe.Rows[0]["CuisineTypeId"] = newCuisineTypeId;
+            dtRecipe.Rows[0]["CuisineId"] = newCuisineId;
             recipe.Save(dtRecipe);
 
             // Assert
             DataTable updatedRecipe = recipe.Load(recipeId);
-            int updatedCuisineTypeId = (int)updatedRecipe.Rows[0]["CuisineTypeId"];
-            TestContext.WriteLine($"After Test: Updated CuisineTypeId: {updatedCuisineTypeId}");
-            Assert.IsTrue(updatedCuisineTypeId == newCuisineTypeId, "Cuisine type was not updated correctly.");
+            int updatedCuisineId = (int)updatedRecipe.Rows[0]["CuisineId"];
+            TestContext.WriteLine($"After Test: Updated CuisineId: {updatedCuisineId}");
+            Assert.IsTrue(updatedCuisineId == newCuisineId, "Cuisine was not updated correctly.");
         }
 
         [Test]
@@ -217,7 +217,7 @@ namespace RecipeTest
             int recipeId = TestHelper.GetMaxRecipeId();
             DataTable dtRecipe = recipe.Load(recipeId);
             int originalStaffMemberId = (int)dtRecipe.Rows[0]["StaffMemberId"];
-            int newStaffMemberId = 2; // Assuming 2 is a valid StaffMemberId.
+            int newStaffMemberId = TestHelper.GetValidStaffMemberId(); 
 
             // Log current state
             TestContext.WriteLine($"Before Test: Original StaffMemberId: {originalStaffMemberId}");
@@ -230,8 +230,9 @@ namespace RecipeTest
             DataTable updatedRecipe = recipe.Load(recipeId);
             int updatedStaffMemberId = (int)updatedRecipe.Rows[0]["StaffMemberId"];
             TestContext.WriteLine($"After Test: Updated StaffMemberId: {updatedStaffMemberId}");
-            Assert.IsTrue(updatedStaffMemberId == newStaffMemberId, "Cuisine type was not updated correctly.");
+            Assert.IsTrue(updatedStaffMemberId == newStaffMemberId, "User name was not updated correctly.");
         }
+
 
     }
 }

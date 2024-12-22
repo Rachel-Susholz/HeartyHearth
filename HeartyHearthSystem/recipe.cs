@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CPUFramework;
-
-namespace HeartyHearthSystem
+﻿namespace HeartyHearthSystem
 {
     public class recipe
     {
@@ -73,7 +64,7 @@ namespace HeartyHearthSystem
             {
                 sql = $"update recipe set " +
                       $"RecipeName = '{r["RecipeName"] ?? ""}', " +
-                      $"CuisineTypeId = {(r["CuisineTypeId"] == DBNull.Value ? "NULL" : r["CuisineTypeId"])}, " +
+                      $"CuisineId = {(r["CuisineId"] == DBNull.Value ? "NULL" : r["CuisineId"])}, " +
                       $"Calories = {(r["Calories"] == DBNull.Value ? 0 : r["Calories"])}, " +
                       $"Drafted = {(r["Drafted"] == DBNull.Value ? "NULL" : $"'{r["Drafted"]}'")}, " +
                       $"Published = {(r["Published"] == DBNull.Value ? "NULL" : $"'{r["Published"]}'")}, " +
@@ -83,9 +74,9 @@ namespace HeartyHearthSystem
             }
             else // Insert new recipe
             {
-                sql = "insert into recipe (RecipeName, CuisineTypeId, Calories,  Drafted, Published, Archived, StaffMemberId) " +
+                sql = "insert into recipe (RecipeName, CuisineId, Calories,  Drafted, Published, Archived, StaffMemberId) " +
                       $"values ('{r["RecipeName"] ?? ""}', " +
-                      $"{(r["CuisineTypeId"] == DBNull.Value ? "NULL" : r["CuisineTypeId"])}, " +
+                      $"{(r["CuisineId"] == DBNull.Value ? "NULL" : r["CuisineId"])}, " +
                       $"{(r["Calories"] == DBNull.Value ? 0 : r["Calories"])}, " +
                       $"{(r["Drafted"] == DBNull.Value ? "NULL" : $"'{r["Drafted"]}'")}, " +
                       $"{(r["Published"] == DBNull.Value ? "NULL" : $"'{r["Published"]}'")}, " +

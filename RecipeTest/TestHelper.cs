@@ -29,9 +29,9 @@ namespace RecipeTest
             return GetMaxId("recipe", "recipeid");
         }
 
-        public static int GetValidCuisineTypeId()
+        public static int GetValidCuisineId()
         {
-            return GetMaxId("recipe", "CuisineTypeId");
+            return GetMaxId("recipe", "CuisineId");
         }
 
         public static int GetValidStaffMemberId()
