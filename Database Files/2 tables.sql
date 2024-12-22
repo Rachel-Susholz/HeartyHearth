@@ -11,7 +11,7 @@ drop table if exists recipeingredient
 drop table if exists measurement
 drop table if exists recipe
 drop table if exists ingredient
-drop table if exists cuisinetype
+drop table if exists cuisine
 drop table if exists staffmember
 go
 
@@ -23,7 +23,7 @@ go
 create table dbo.StaffMember(
     StaffMemberId int not null identity primary key,
     UserName varchar(50) not null
-        constraint u_StaffMember_UserName unique
+        constraint u_StaffMember_UserName_must_be unique
         constraint ck_UserName_cannot_be_blank check (UserName <> ''),
     FirstName varchar(50) not null
         constraint ck_FirstName_cannot_be_blank check (FirstName <> ''),
@@ -31,17 +31,19 @@ create table dbo.StaffMember(
         constraint ck_LastName_cannot_be_blank check (LastName <> '')
 )
 
--- CuisineType Table
-create table dbo.CuisineType(
-    CuisineTypeId int not null identity primary key,
-    CuisineName varchar(50) unique not null
+-- Cuisine Table
+create table dbo.Cuisine(
+    CuisineId int not null identity primary key,
+    CuisineName varchar(50) not null
+        constraint u_Cuisine_Name_must_be unique
         constraint ck_CuisineName_cannot_be_blank check (CuisineName <> '')
 )
 
 -- Ingredient Table
 create table dbo.Ingredient(
     IngredientId int not null identity primary key,
-    IngredientName varchar(100) unique not null
+    IngredientName varchar(100) not null
+        constraint u_Ingredient_Name_must_be unique
         constraint ck_IngredientName_cannot_be_blank check (IngredientName <> ''),
     ImagePath as ('Ingredient_' + replace(IngredientName, '', '_') + '.jpg') 
 )
@@ -49,9 +51,10 @@ create table dbo.Ingredient(
 -- Recipe Table
 create table dbo.Recipe(
     RecipeId int not null identity primary key,
-    CuisineTypeId int not null 
-        constraint f_Cuisine_Recipe foreign key references CuisineType(CuisineTypeId),
-    RecipeName varchar(150) unique not null
+    CuisineId int not null 
+        constraint f_Cuisine_Recipe foreign key references Cuisine(CuisineId),
+    RecipeName varchar(150) not null
+        constraint u_Recipe_Name_must_be unique
         constraint ck_RecipeName_cannot_be_blank check (RecipeName <> ''),
     Calories int not null
         constraint ck_calorie_count_must_be_greater_than_zero check (calories > 0),
@@ -79,7 +82,8 @@ create table dbo.Recipe(
 -- Measurement Table
 create table dbo.Measurement(
     MeasurementId int not null identity primary key,
-    MeasurementType varchar(50) unique not null
+    MeasurementType varchar(50) not null
+        constraint u_Measurement_Name_must_be unique
         constraint ck_MeasurementType_cannot_be_blank check (MeasurementType <> '')
 )
 
@@ -115,8 +119,9 @@ create table dbo.RecipeDirection(
 -- Meal Table
 create table dbo.Meal(
     MealId int not null identity primary key,
-    MealName varchar(100) unique not null
-         constraint ck_MealName_cannot_be_blank check (MealName <> ''),
+    MealName varchar(100) not null
+        constraint u_Meal_Name_must_be unique
+        constraint ck_MealName_cannot_be_blank check (MealName <> ''),
     ImagePath as ('Meal_' + replace(MealName, '', '_') + '.jpg'),
     MealStatus bit not null,
     Created datetime default getdate() not null
@@ -128,9 +133,11 @@ create table dbo.Meal(
 -- CourseType Table
 create table dbo.CourseType(
     CourseTypeId int not null identity primary key,
-    CourseTypeName varchar(50) unique not null
+    CourseTypeName varchar(50) not null
+        constraint u_CourseType_Name_must_be unique
         constraint ck_CourseTypeName_cannot_be_blank check (CourseTypeName <> ''),
-    CourseSequence int unique not null 
+    CourseSequence int not null
+        constraint u_Course_Sequence_must_be unique 
         constraint ck_CourseSequence_must_be_greater_than_zero check (CourseSequence > 0),
 )
 
@@ -158,7 +165,8 @@ create table dbo.CourseRecipe(
 -- Cookbook Table
 create table dbo.Cookbook(
     CookbookId int not null identity primary key,
-    CookbookName varchar(100) unique not null
+    CookbookName varchar(100) not null
+        constraint u_Cookbook_Name_must_be unique
         constraint ck_CookbookName_cannot_be_blank check (CookbookName <> ''),
     Price decimal(10, 2) not null
         constraint ck_Price_must_be_greater_than_zero check (Price > 0),

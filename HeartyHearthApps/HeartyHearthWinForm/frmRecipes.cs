@@ -1,11 +1,8 @@
-﻿using System.Data;
-using System.Diagnostics;
-
-namespace HeartyHearthWinForm;
+﻿namespace HeartyHearthWinForm;
 
 public partial class frmRecipeInfo : Form
 {
-    DataTable dtRecipe;
+    DataTable dtRecipe = new();
     
     public frmRecipeInfo()
     {
@@ -24,7 +21,7 @@ public partial class frmRecipeInfo : Form
         DataTable dtCuisines = recipe.GetCuisineList();
         DataTable dtStaffMembers = recipe.GetUserList();
 
-        WindowsFormsUtility.SetListBinding(lstCuisineName, dtCuisines, dtRecipe, "CuisineType");
+        WindowsFormsUtility.SetListBinding(lstCuisineName, dtCuisines, dtRecipe, "Cuisine");
         WindowsFormsUtility.SetListBinding(lstUserName, dtStaffMembers, dtRecipe, "StaffMember");
         WindowsFormsUtility.SetControlBinding(txtRecipeName, dtRecipe);
         WindowsFormsUtility.SetControlBinding(txtCalories, dtRecipe);
@@ -39,12 +36,36 @@ public partial class frmRecipeInfo : Form
 
    private void Save()
     {
-        recipe.Save(dtRecipe);
+        Application.UseWaitCursor = true;
+        try
+        {
+            recipe.Save(dtRecipe);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "HeartyHearth");
+        }
+        finally
+        {
+            Application.UseWaitCursor = false;
+        }
     }
 
     private void Delete()
     {
-        recipe.Delete(dtRecipe);
+        Application.UseWaitCursor = true;
+        try
+        {
+            recipe.Delete(dtRecipe);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "HeartyHearth");
+        }
+        finally
+        {
+            Application.UseWaitCursor = true;
+        }
         this.Close();
     }
     private void BtnDelete_Click(object? sender, EventArgs e)

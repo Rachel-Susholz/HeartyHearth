@@ -1,41 +1,61 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CPUFramework;
-
-namespace HeartyHearthSystem
+﻿namespace HeartyHearthSystem
 {
     public class recipe
     {
         public static DataTable SearchRecipes(string recipename)
         {
-            string sql = "select RecipeId, RecipeName from Recipe r where r.RecipeName like '%" + recipename + "%'";
-            DataTable dt = SQLUtility.GetDataTable(sql);
+            DataTable dt = new();
+
+            SqlCommand cmd = SQLUtility.GetSqlCommand("RecipeNameAndIdGet");
+
+            cmd.Parameters["@RecipeName"].Value = recipename;
+
+            dt = SQLUtility.GetDataTable(cmd);
+
             return dt;
         }
         public static DataTable Load(int recipeid)
         {
-            string sql = "select r.RecipeId, r.RecipeName, ct.CuisineTypeId, ct.CuisineName, r.Calories,  r.RecipeStatus, r.Drafted, r.Archived, " +
-            "r.Published, sm.StaffMemberId, sm.UserName " +
-            "from Recipe r join CuisineType ct on r.CuisineTypeId = ct.CuisineTypeId join StaffMember sm on r.StaffMemberId = sm.StaffMemberId where r.RecipeId = " + recipeid.ToString();
-            return SQLUtility.GetDataTable(sql);
-           
+
+            DataTable dt = new();
+
+            SqlCommand cmd = SQLUtility.GetSqlCommand("RecipeGet");
+
+            cmd.Parameters["@RecipeId"].Value = recipeid;
+
+            dt = SQLUtility.GetDataTable(cmd);
+
+            return dt;
+
         }
         public static DataTable GetCuisineList()
         {
-             return SQLUtility.GetDataTable("Select CuisineTypeId, CuisineName from CuisineType");
-            
+            DataTable dt = new();
+
+            SqlCommand cmd = SQLUtility.GetSqlCommand("CuisineGet");
+
+            cmd.Parameters["@All"].Value = 1;
+
+            dt = SQLUtility.GetDataTable(cmd);
+
+            return dt;
+
         }
         public static DataTable GetUserList()
         {
-             return SQLUtility.GetDataTable("Select StaffMemberId, UserName from StaffMember");
+            DataTable dt = new();
+
+            SqlCommand cmd = SQLUtility.GetSqlCommand("StaffMemberGet");
+
+            cmd.Parameters["@All"].Value = 1;
+
+            dt = SQLUtility.GetDataTable(cmd);
+
+            return dt;
         }
         public static void Save(DataTable dtRecipe)
         {
-            SQLUtility.DebugPrintDataTable(dtRecipe);
+            //SQLUtility.DebugPrintDataTable(dtRecipe);
             DataRow r = dtRecipe.Rows[0];
             int id = (int)(r["RecipeId"] ?? 0); // Default to 0 if RecipeId is null
             string sql = "";
@@ -44,7 +64,7 @@ namespace HeartyHearthSystem
             {
                 sql = $"update recipe set " +
                       $"RecipeName = '{r["RecipeName"] ?? ""}', " +
-                      $"CuisineTypeId = {(r["CuisineTypeId"] == DBNull.Value ? "NULL" : r["CuisineTypeId"])}, " +
+                      $"CuisineId = {(r["CuisineId"] == DBNull.Value ? "NULL" : r["CuisineId"])}, " +
                       $"Calories = {(r["Calories"] == DBNull.Value ? 0 : r["Calories"])}, " +
                       $"Drafted = {(r["Drafted"] == DBNull.Value ? "NULL" : $"'{r["Drafted"]}'")}, " +
                       $"Published = {(r["Published"] == DBNull.Value ? "NULL" : $"'{r["Published"]}'")}, " +
@@ -54,9 +74,9 @@ namespace HeartyHearthSystem
             }
             else // Insert new recipe
             {
-                sql = "insert into recipe (RecipeName, CuisineTypeId, Calories,  Drafted, Published, Archived, StaffMemberId) " +
+                sql = "insert into recipe (RecipeName, CuisineId, Calories,  Drafted, Published, Archived, StaffMemberId) " +
                       $"values ('{r["RecipeName"] ?? ""}', " +
-                      $"{(r["CuisineTypeId"] == DBNull.Value ? "NULL" : r["CuisineTypeId"])}, " +
+                      $"{(r["CuisineId"] == DBNull.Value ? "NULL" : r["CuisineId"])}, " +
                       $"{(r["Calories"] == DBNull.Value ? 0 : r["Calories"])}, " +
                       $"{(r["Drafted"] == DBNull.Value ? "NULL" : $"'{r["Drafted"]}'")}, " +
                       $"{(r["Published"] == DBNull.Value ? "NULL" : $"'{r["Published"]}'")}, " +

@@ -14,7 +14,7 @@ delete RecipeIngredient
 delete Measurement
 delete Recipe
 delete Ingredient
-delete CuisineType
+delete Cuisine
 delete StaffMember
 go
 
@@ -25,7 +25,7 @@ union select 'asmith', 'Alice', 'Smith'
 union select 'mjohnson', 'Michael', 'Johnson'
 
 -- 2) Cuisine Types
-insert CuisineType(CuisineName)
+insert Cuisine(CuisineName)
 select 'American'
 union select 'French'
 union select 'English'
@@ -82,10 +82,10 @@ with x as (
     union select 'Italian', 'Garlic Knots', 200, 'jdoe', '2024-12-15', null,  null
     union select 'American', 'Apple Pie', 450, 'asmith', '2023-12-15', '2024-02-07', null
 )
-insert Recipe(CuisineTypeId, RecipeName, Calories, StaffMemberId, Drafted,Published, Archived)
-select ct.CuisineTypeId, x.RecipeName, x.Calories, sm.StaffMemberId, x.Drafted, x.Published, x.Archived
+insert Recipe(CuisineId, RecipeName, Calories, StaffMemberId, Drafted,Published, Archived)
+select ct.CuisineId, x.RecipeName, x.Calories, sm.StaffMemberId, x.Drafted, x.Published, x.Archived
 from x
-join CuisineType ct 
+join Cuisine ct 
 on x.CuisineName = ct.CuisineName
 join StaffMember sm 
 on x.UserName = sm.UserName
