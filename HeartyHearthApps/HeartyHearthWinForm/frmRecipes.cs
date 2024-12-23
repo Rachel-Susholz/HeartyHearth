@@ -53,6 +53,11 @@ public partial class frmRecipeInfo : Form
 
     private void Delete()
     {
+        var response = MessageBox.Show("Are you sure you want to delete this recipe?", "HeartyHearth", MessageBoxButtons.YesNo);
+        if(response == DialogResult.No)
+        {
+            return;
+        }
         Application.UseWaitCursor = true;
         try
         {
@@ -64,7 +69,7 @@ public partial class frmRecipeInfo : Form
         }
         finally
         {
-            Application.UseWaitCursor = true;
+            Application.UseWaitCursor = false;
         }
         this.Close();
     }

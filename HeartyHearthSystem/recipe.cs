@@ -8,7 +8,7 @@
 
             SqlCommand cmd = SQLUtility.GetSqlCommand("RecipeNameAndIdGet");
 
-            cmd.Parameters["@RecipeName"].Value = recipename;
+            SQLUtility.SetParamValue(cmd, "@RecipeName", recipename);
             if (recipename == "")
             {
                 cmd.Parameters["@All"].Value = 1;
@@ -25,7 +25,7 @@
 
             SqlCommand cmd = SQLUtility.GetSqlCommand("RecipeGet");
 
-            cmd.Parameters["@RecipeId"].Value = recipeid;
+            SQLUtility.SetParamValue(cmd, "@RecipeId", recipeid);
 
             dt = SQLUtility.GetDataTable(cmd);
 
@@ -38,7 +38,7 @@
 
             SqlCommand cmd = SQLUtility.GetSqlCommand("CuisineGet");
 
-            cmd.Parameters["@All"].Value = 1;
+            SQLUtility.SetParamValue(cmd, "@All", 1);
 
             dt = SQLUtility.GetDataTable(cmd);
 
@@ -51,7 +51,7 @@
 
             SqlCommand cmd = SQLUtility.GetSqlCommand("StaffMemberGet");
 
-            cmd.Parameters["@All"].Value = 1;
+            SQLUtility.SetParamValue(cmd, "@All", 1);
 
             dt = SQLUtility.GetDataTable(cmd);
 
@@ -96,8 +96,9 @@
        public static void Delete(DataTable dtRecipe)
         {
             int id = (int)dtRecipe.Rows[0]["RecipeId"];
-            string sql = "delete recipe where RecipeId = " + id;
-            SQLUtility.ExecuteSQL(sql);
+            SqlCommand cmd = SQLUtility.GetSqlCommand("RecipeDelete");
+            SQLUtility.SetParamValue(cmd, "@RecipeId", id);
+            SQLUtility.ExecuteSQL(cmd);
             
         }
 
