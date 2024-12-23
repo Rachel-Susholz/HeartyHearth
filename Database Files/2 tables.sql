@@ -190,3 +190,4 @@ create table dbo.CookbookRecipe(
         constraint u_CookbookRecipe_cookbook_recipe unique (CookbookId, RecipeId),
         constraint u_CookbookRecipe_cookbook_RecipeSequence unique (CookbookId, RecipeSequence)
 );
+select * from Recipe

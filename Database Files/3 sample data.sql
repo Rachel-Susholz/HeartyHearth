@@ -274,7 +274,7 @@ with x as (
     union select 'Quick Breakfast Recipes', 'Butter Muffins', 2
     union select 'Healthy Snack Ideas', 'Apple Yogurt Smoothie', 1
     union select 'Dinner Done', 'Spaghetti Carbonara', 1
-    union select 'Dinner Done', 'Tacos al Pastor', 2
+   
 )
 insert into CookbookRecipe (CookbookId, RecipeId, RecipeSequence)
 select c.CookbookId, r.RecipeId, x.RecipeSequence
