@@ -52,7 +52,7 @@ declare @Return int, @Message varchar(500)
 exec @Return = RecipeDelete @RecipeId = @recipeid, @Message = @Message output
 
 select @Return, @Message
--- Display records matching the business rule AFTER deletion
+-- Display records AFTER deletion
 select *
 from Recipe r
 
@@ -80,8 +80,6 @@ exec @Return = RecipeDelete @RecipeId = @recipeid, @Message = @Message output
 
 select @Return, @Message
 
--- Display records matching the business rule AFTER deletion
+-- Display records  AFTER deletion
 select *
 from Recipe r
-
-
