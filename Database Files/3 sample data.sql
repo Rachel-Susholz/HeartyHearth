@@ -72,14 +72,14 @@ union select 'balsamic vinegar'
 -- 4) Recipes
 ;
 with x as (
-    select CuisineName = 'American', RecipeName = 'Chocolate Chip Cookies', Calories = 200, UserName = 'jdoe', Drafted = '2024-01-01', Published = '2024-01-15', Archived = null
+    select CuisineName = 'American', RecipeName = 'Chocolate Chip Cookies', Calories = 200, UserName = 'jdoe', Drafted = '2024-01-01', Published = '2024-01-15', Archived = '2024-02-06'
     union select 'French', 'Apple Yogurt Smoothie', 150, 'asmith', '2024-01-05', '2024-01-20', null
     union select 'English', 'Cheese Bread', 300, 'jdoe', '2024-01-10', null, null
     union select 'American', 'Butter Muffins', 250, 'asmith', '2024-01-15', '2024-02-01', null
-    union select 'Italian', 'Spaghetti Carbonara', 400, 'jdoe', '2024-01-20', '2024-02-05', null
+    union select 'Italian', 'Spaghetti Carbonara', 400, 'jdoe', '2024-01-20', '2024-02-05', '2024-07-12'
     union select 'Mexican', 'Tacos al Pastor', 350, 'asmith', '2024-01-25', null, null
     union select 'Italian', 'Caprese Salad', 200, 'mjohnson', '2024-02-01', null, '2024-02-15'
-    union select 'Italian', 'Garlic Knots', 200, 'jdoe', '2024-12-15', null, null
+    union select 'Italian', 'Garlic Knots', 200, 'jdoe', '2024-12-15', null, '2024-09-07'
     union select 'American', 'Apple Pie', 450, 'asmith', '2023-12-15', '2024-02-07', null
 )
 insert Recipe(CuisineId, RecipeName, Calories, StaffMemberId, Drafted,Published, Archived)
