@@ -127,6 +127,7 @@ namespace RecipeTest
             Assert.IsTrue(checkdt.Rows.Count == 0, "State After Test: Recipe should be deleted.");
         }
 
+        [Test]
         public void TestDeleteRecipeWithRelatedRecords()
 
         {
@@ -150,8 +151,45 @@ namespace RecipeTest
           
         }
 
-        
-        
+        [Test]
+        public void TestDeleteRecipeWithInvalidStatus()
+        {
+            // Arrange
+            DataTable dt = SQLUtility.GetDataTable(
+                "select r.RecipeId, r.RecipeName, r.RecipeStatus, r.Published, r.Archived " +
+                "from Recipe r where r.RecipeName = 'Apple Pie'");
+
+            int recipeId = 0;
+            string recipeName = "";
+            string status = "";
+            DateTime? statusDate = null;
+
+            if (dt.Rows.Count > 0)
+            {
+                recipeId = (int)dt.Rows[0]["RecipeId"];
+                recipeName = dt.Rows[0]["RecipeName"].ToString();
+                status = dt.Rows[0]["RecipeStatus"].ToString();
+                statusDate = status == "Archived"
+                    ? dt.Rows[0]["Archived"] as DateTime?
+                    : dt.Rows[0]["Published"] as DateTime?;
+            }
+
+            Assume.That(recipeId > 0, "No recipes found in the database, cannot run the test.");
+            Console.WriteLine($"Attempting to delete recipe with RecipeId: {recipeId}, RecipeName: {recipeName}, Status: {status}, StatusDate: {statusDate?.ToShortDateString()}.");
+
+            // Act & Assert
+            if (status == "Drafted" || (status == "Archived" && (DateTime.Now - statusDate.Value).TotalDays > 30))
+            {
+                Console.WriteLine("Recipe is eligible for deletion. Skipping exception test.");
+                return;
+            }
+
+            Exception ex = Assert.Throws<Exception>(() => recipe.Delete(dt));
+            
+            Console.WriteLine($"Test passed: {ex.Message}");
+        }
+
+
 
         [Test]
             public void TestGetCuisineList()
