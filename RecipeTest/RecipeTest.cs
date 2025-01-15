@@ -152,7 +152,7 @@ namespace RecipeTest
         }
 
         [Test]
-        public void TestDeleteRecipeWithInvalidStatus()
+        public void TestDeleteRecipeWithBusinessRule()
         {
             // Arrange
             DataTable dt = SQLUtility.GetDataTable(
@@ -169,9 +169,11 @@ namespace RecipeTest
                 recipeId = (int)dt.Rows[0]["RecipeId"];
                 recipeName = dt.Rows[0]["RecipeName"].ToString();
                 status = dt.Rows[0]["RecipeStatus"].ToString();
-                statusDate = status == "Archived"
-                    ? dt.Rows[0]["Archived"] as DateTime?
-                    : dt.Rows[0]["Published"] as DateTime?;
+                if (status == "Archived")
+                {
+                    // Only retrieve ArchivedDate if the status is Archived
+                    statusDate = dt.Rows[0]["ArchivedDate"] as DateTime?;
+                }
             }
 
             Assume.That(recipeId > 0, "No recipes found in the database, cannot run the test.");
