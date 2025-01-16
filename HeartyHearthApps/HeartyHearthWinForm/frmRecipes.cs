@@ -3,6 +3,7 @@
 public partial class frmRecipeInfo : Form
 {
     DataTable dtRecipe = new();
+    BindingSource bindsource = new();
     
     public frmRecipeInfo()
     {
@@ -14,6 +15,7 @@ public partial class frmRecipeInfo : Form
     {
 
         dtRecipe = recipe.Load(recipeid);
+        bindsource.DataSource = dtRecipe;
         if (recipeid == 0)
         {
             dtRecipe.Rows.Add();
@@ -23,12 +25,12 @@ public partial class frmRecipeInfo : Form
 
         WindowsFormsUtility.SetListBinding(lstCuisineName, dtCuisines, dtRecipe, "Cuisine");
         WindowsFormsUtility.SetListBinding(lstUserName, dtStaffMembers, dtRecipe, "StaffMember");
-        WindowsFormsUtility.SetControlBinding(txtRecipeName, dtRecipe);
-        WindowsFormsUtility.SetControlBinding(txtCalories, dtRecipe);
-        WindowsFormsUtility.SetControlBinding(txtRecipeStatus, dtRecipe);
-        WindowsFormsUtility.SetControlBinding(txtDrafted, dtRecipe);
-        WindowsFormsUtility.SetControlBinding(lblPublished, dtRecipe);
-        WindowsFormsUtility.SetControlBinding(lblArchived, dtRecipe);
+        WindowsFormsUtility.SetControlBinding(txtRecipeName, bindsource);
+        WindowsFormsUtility.SetControlBinding(txtCalories, bindsource);
+        WindowsFormsUtility.SetControlBinding(txtRecipeStatus, bindsource);
+        WindowsFormsUtility.SetControlBinding(txtDrafted, bindsource);
+        WindowsFormsUtility.SetControlBinding(lblPublished, bindsource);
+        WindowsFormsUtility.SetControlBinding(lblArchived, bindsource);
         this.Show();
     }
 
@@ -40,6 +42,7 @@ public partial class frmRecipeInfo : Form
         try
         {
             recipe.Save(dtRecipe);
+            bindsource.ResetBindings(false);
         }
         catch (Exception ex)
         {
