@@ -17,34 +17,13 @@ begin
         
     if @RecipeId = 0 
     begin 
-     if @Drafted is not null or @Published is not null or @Archived is not null
-        begin
-            select @return = 1,
-            @message = 'Date columns must use default values when inserting.' 
-            goto Finished;
-        end
-
         insert Recipe(CuisineId, RecipeName, Calories, Drafted, Published, Archived, StaffMemberId)
         values (@CuisineId, @RecipeName, @Calories, getdate(), null, null, @StaffMemberId)  
 
         select @RecipeId = scope_identity()
     end 
-    else 
+    else
     begin
-     if exists (
-            select 1
-            from Recipe
-            where RecipeId = @RecipeId
-              and (
-                   @Drafted is not null
-                or @Published is not null
-                or @Archived is not null
-              )
-        )
-    begin
-        select @return = 1, @message = 'Date columns cannot be modified.';
-        goto Finished;
-    end
         update recipe 
         set 
         CuisineId = @CuisineId, 
