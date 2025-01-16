@@ -156,8 +156,8 @@ namespace RecipeTest
         {
             // Arrange
             DataTable dt = SQLUtility.GetDataTable(
-                "select r.RecipeId, r.RecipeName, r.RecipeStatus, r.Published, r.Archived " +
-                "from Recipe r where r.RecipeName = 'Apple Pie'");
+                "select top 1 * from recipe r  where" +
+    "((r.RecipeStatus = 'Archived' and datediff(day, r.Archived, getdate()) < 30) or r.RecipeStatus = 'Published')");
 
             int recipeId = 0;
             string recipeName = "";
