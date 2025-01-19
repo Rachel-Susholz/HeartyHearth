@@ -180,11 +180,7 @@ namespace RecipeTest
             Console.WriteLine($"Attempting to delete recipe with RecipeId: {recipeId}, RecipeName: {recipeName}, Status: {status}, StatusDate: {statusDate?.ToShortDateString()}.");
 
             // Act & Assert
-            if (status == "Drafted" || (status == "Archived" && (DateTime.Now - statusDate.Value).TotalDays > 30))
-            {
-                Console.WriteLine("Recipe is eligible for deletion. Skipping exception test.");
-                return;
-            }
+           
 
             Exception ex = Assert.Throws<Exception>(() => recipe.Delete(dt));
             
