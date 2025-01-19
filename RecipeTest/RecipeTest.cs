@@ -172,7 +172,7 @@ namespace RecipeTest
                 if (status == "Archived")
                 {
                     // Only retrieve ArchivedDate if the status is Archived
-                    statusDate = dt.Rows[0]["ArchivedDate"] as DateTime?;
+                    statusDate = dt.Rows[0]["Archived"] as DateTime?;
                 }
             }
 
