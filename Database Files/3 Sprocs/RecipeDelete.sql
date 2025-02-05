@@ -83,3 +83,6 @@ select @Return, @Message
 -- Display records  AFTER deletion
 select *
 from Recipe r
+go 
+
+
