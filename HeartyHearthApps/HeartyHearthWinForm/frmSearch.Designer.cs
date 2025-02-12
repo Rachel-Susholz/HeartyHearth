@@ -33,8 +33,8 @@
             txtRecipe = new TextBox();
             lblRecipe = new Label();
             btnSearch = new Button();
-            gRecipes = new DataGridView();
             btnNew = new Button();
+            gRecipes = new DataGridView();
             tblMain.SuspendLayout();
             tblControls.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gRecipes).BeginInit();
@@ -89,7 +89,7 @@
             lblRecipe.Name = "lblRecipe";
             lblRecipe.Size = new Size(54, 20);
             lblRecipe.TabIndex = 1;
-            lblRecipe.Text = "Recipe";
+            lblRecipe.Text = "&Recipe";
             lblRecipe.TextAlign = ContentAlignment.MiddleRight;
             // 
             // btnSearch
@@ -103,17 +103,6 @@
             btnSearch.Text = "Search";
             btnSearch.UseVisualStyleBackColor = true;
             // 
-            // gRecipes
-            // 
-            gRecipes.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            gRecipes.Dock = DockStyle.Fill;
-            gRecipes.Location = new Point(3, 45);
-            gRecipes.Name = "gRecipes";
-            gRecipes.RowHeadersWidth = 51;
-            gRecipes.RowTemplate.Height = 29;
-            gRecipes.Size = new Size(794, 402);
-            gRecipes.TabIndex = 1;
-            // 
             // btnNew
             // 
             btnNew.AutoSize = true;
@@ -124,6 +113,17 @@
             btnNew.TabIndex = 3;
             btnNew.Text = "New";
             btnNew.UseVisualStyleBackColor = true;
+            // 
+            // gRecipes
+            // 
+            gRecipes.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            gRecipes.Dock = DockStyle.Fill;
+            gRecipes.Location = new Point(3, 45);
+            gRecipes.Name = "gRecipes";
+            gRecipes.RowHeadersWidth = 51;
+            gRecipes.RowTemplate.Height = 29;
+            gRecipes.Size = new Size(794, 402);
+            gRecipes.TabIndex = 1;
             // 
             // frmSearch
             // 

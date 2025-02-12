@@ -1,7 +1,7 @@
 create or alter procedure dbo.StaffMemberGet(@StaffMemberId int = 0, @All bit = 0, @UserName varchar(50) = '')
 as 
 begin 
-    select sm.StaffMemberId, sm.UserName
+    select sm.StaffMemberId, sm.FirstName, sm.LastName, sm.UserName
     from StaffMember sm
     where sm.StaffMemberId = @StaffMemberId
     or @All = 1

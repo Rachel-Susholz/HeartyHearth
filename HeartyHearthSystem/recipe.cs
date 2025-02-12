@@ -32,6 +32,19 @@
             return dt;
 
         }
+
+        public static DataTable GetRecipeList()
+        {
+
+            DataTable dt = new();
+
+            SqlCommand cmd = SQLUtility.GetSqlCommand("RecipeListGet");
+
+            dt = SQLUtility.GetDataTable(cmd);
+
+            return dt;
+
+        }
         public static DataTable GetCuisineList()
         {
             DataTable dt = new();
@@ -57,6 +70,15 @@
 
             return dt;
         }
+
+        public static DataTable GetDashboardCounts()
+        {
+            DataTable dt = new();
+            SqlCommand cmd = SQLUtility.GetSqlCommand("DashboardCountsGet");
+            dt = SQLUtility.GetDataTable(cmd);
+            return dt;
+        }
+
         public static void Save(DataTable dtRecipe)
         {
             //SQLUtility.DebugPrintDataTable(dtRecipe);

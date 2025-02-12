@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace HeartyHearthWinForm
+﻿namespace HeartyHearthWinForm
 {
     public partial class frmSearch : Form
     {
@@ -19,10 +8,10 @@ namespace HeartyHearthWinForm
             btnSearch.Click += BtnSearch_Click;
             btnNew.Click += BtnNew_Click;
             gRecipes.CellDoubleClick += GRecipes_CellDoubleClick;
-            WindowsFormsUtility.FormatGridForSearchResults(gRecipes);
+            txtRecipe.KeyDown += TxtRecipe_KeyDown;
+            gRecipes.KeyDown += GRecipes_KeyDown;    
         }
 
-        
 
         private void GRecipes_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
         {
@@ -30,7 +19,7 @@ namespace HeartyHearthWinForm
         }
         private void BtnSearch_Click(object? sender, EventArgs e)
         {
-            SearchForRecipe(txtRecipe.Text);
+            DoSearch();
         }
 
         private void BtnNew_Click(object? sender, EventArgs e)
@@ -38,24 +27,65 @@ namespace HeartyHearthWinForm
             ShowRecipeForm(-1); 
         }
 
+        private void TxtRecipe_KeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                DoSearch();
+            }
+        }
+
+
+        private void GRecipes_KeyDown(object? sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter && gRecipes.SelectedRows.Count > 0)
+            {
+                ShowRecipeForm(gRecipes.SelectedRows[0].Index);
+                e.SuppressKeyPress = true;
+            }
+        }
         private void ShowRecipeForm(int rowindex)
         {
             int id = 0;
             if (rowindex > -1)
             {
-                id = (int)gRecipes.Rows[rowindex].Cells["RecipeId"].Value;
+                id = WindowsFormsUtility.GetIdFromGrid(gRecipes, rowindex, "RecipeId");
             }
-            
-            frmRecipeInfo frm = new();
-            frm.ShowForm(id);
+            if (this.MdiParent != null && this.MdiParent is frmMain)
+            {
+                ((frmMain)this.MdiParent).OpenForm(typeof(frmRecipeInfo), id);
+            } 
         }
-        private DataTable SearchForRecipe(string recipename)
+
+        private void DoSearch()
         {
-            DataTable dt = recipe.SearchRecipes(recipename);
-            gRecipes.DataSource = dt;
-            gRecipes.Columns["RecipeId"].Visible = false;
-            return dt;
-            
+            SearchForRecipe(txtRecipe.Text);
         }
+        private void SearchForRecipe(string recipename)
+        {
+            try
+            {
+                this.Cursor = Cursors.WaitCursor;
+                DataTable dt = recipe.SearchRecipes(recipename);
+                gRecipes.DataSource = dt;
+                WindowsFormsUtility.FormatGridForSearchResults(gRecipes, "Recipe");
+                if (gRecipes.Rows.Count > 0)
+                {
+                    gRecipes.Focus();
+                    gRecipes.Rows[0].Selected = true;
+                }
+            }
+            catch
+            {
+                throw;
+            } 
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
+           
+        }
+
+       
     }
 }

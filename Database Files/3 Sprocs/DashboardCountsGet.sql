@@ -1,4 +1,4 @@
-create or alter procedure GetDashboardCounts
+create or alter procedure DashboardCountsGet
 as
 begin
     select
