@@ -5,6 +5,7 @@ namespace HeartyHearthWinForm;
 public partial class frmRecipeInfo : Form
 {
     DataTable dtRecipe = new();
+    DataTable dtRecipeIngredient = new();
     BindingSource bindsource = new();
     
     public frmRecipeInfo()
@@ -37,6 +38,14 @@ public partial class frmRecipeInfo : Form
         WindowsFormsUtility.SetControlBinding(lblPublished, bindsource);
         WindowsFormsUtility.SetControlBinding(lblArchived, bindsource);
         this.Text = GetRecipeDesc();
+
+        dtRecipeIngredient = RecipeIngredient.LoadByRecipeId(recipeid);
+        gIngredients.DataSource = dtRecipeIngredient;
+        WindowsFormsUtility.AddComboBoxToGrid(gIngredients, DataMaintenance.GetDataList("Ingredient"), "IngredientName", "Ingredient");
+        WindowsFormsUtility.AddComboBoxToGrid(gIngredients, DataMaintenance.GetDataList("Measurement"), "MeasurementType", "Measurement");
+        WindowsFormsUtility.FormatGridForEdit(gIngredients, "RecipeIngredient");
+
+
         this.Show();
     }
 
