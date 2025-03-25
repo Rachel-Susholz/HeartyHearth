@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace HeartyHearthWinForm
+﻿namespace HeartyHearthWinForm
 {
     public partial class frmDashboard : Form
     {
@@ -27,7 +17,6 @@ namespace HeartyHearthWinForm
             LoadDashboardCounts();
         }
 
-
         private void LoadDashboardCounts()
         {
             DataTable dt = recipe.GetDashboardCounts();
@@ -40,7 +29,6 @@ namespace HeartyHearthWinForm
 
             gDashboard.DataSource = dashboardTable;
 
-            // Populate the rows manually
             if (dt.Rows.Count > 0)
             {
                 dashboardTable.Rows.Add("Recipes", dt.Rows[0]["NumRecipes"]);
@@ -48,7 +36,6 @@ namespace HeartyHearthWinForm
                 dashboardTable.Rows.Add("Cookbooks", dt.Rows[0]["NumCookbooks"]);
             }
 
-            // Format headers
             gDashboard.Columns["Type"].HeaderText = "Type";
             gDashboard.Columns["Number"].HeaderText = "Number";
         }

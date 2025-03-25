@@ -1,47 +1,39 @@
-﻿using HeartyHearthSystem;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace HeartyHearthWinForm
+﻿namespace HeartyHearthWinForm
 {
     public partial class frmRecipeList : Form
     {
         public frmRecipeList()
         {
             InitializeComponent();
-            this.Load += FrmRecipeList_Load;
-        }
-
-        private void FrmRecipeList_Load(object sender, EventArgs e)
-        {
-            LoadGrid();
+            this.Load += (s, e) => LoadGrid();
+            gRecipeList.CellDoubleClick += gRecipeList_CellDoubleClick;
+            btnNewRecipe.Click += BtnNewRecipe_Click;
         }
 
         private void LoadGrid()
         {
-            try
+            DataTable dt = recipe.GetRecipeList();
+            ListHelper.LoadGrid(gRecipeList, dt, "RecipeId", new Dictionary<string, string>
             {
-                DataTable dt = recipe.GetRecipeList();
-                gRecipeList.Columns["RecipeId"].Visible = false;
-                gRecipeList.Columns["RecipeName"].HeaderText = "Recipe Name";
-                gRecipeList.Columns["Status"].HeaderText = "Status";
-                gRecipeList.Columns["User"].HeaderText = "User";
-                gRecipeList.Columns["Calories"].HeaderText = "Calories";
+                { "RecipeName", "Recipe Name" },
+                { "RecipeStatus", "Status" },
+                { "UserName", "User" },
+                { "Calories", "Calories" }
+            });
+        }
 
-                gRecipeList.DataSource = dt;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error loading recipes: " + ex.Message);
-            }
+        private void gRecipeList_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            int recipeId = WindowsFormsUtility.GetIdFromGrid(gRecipeList, e.RowIndex, "RecipeId");
+            if (this.MdiParent is frmMain mainForm)
+                mainForm.OpenForm(typeof(frmRecipeInfo), recipeId);
+        }
+
+        private void BtnNewRecipe_Click(object sender, EventArgs e)
+        {
+            if (this.MdiParent is frmMain mainForm)
+                mainForm.OpenForm(typeof(frmRecipeInfo), 0);
         }
     }
 }
-

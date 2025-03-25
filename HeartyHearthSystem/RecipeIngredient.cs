@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CPUWindowFormsFramework;
 
 namespace HeartyHearthSystem
 {
@@ -16,5 +12,20 @@ namespace HeartyHearthSystem
             dt = SQLUtility.GetDataTable(cmd);
             return dt;
         }
+
+        public static void Save(DataTable dt)
+        {
+            if (dt.Columns.Contains("Quantity") && !dt.Columns.Contains("Amount"))
+            {
+                dt.Columns["Quantity"].ColumnName = "Amount";
+            }
+            if (dt.Columns.Contains("Sequence") && !dt.Columns.Contains("IngredientSequence"))
+            {
+                dt.Columns["Sequence"].ColumnName = "IngredientSequence";
+            }
+
+            SQLUtility.SaveDataTable(dt, "RecipeIngredientUpdate");
+        }  
     }
 }
+

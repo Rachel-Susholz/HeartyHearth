@@ -1,4 +1,4 @@
-create or alter procedure dbo.CourseDelete(@CourseTypeId int, @Message varchar(500) = '' output)
+create or alter procedure dbo.CourseTypeDelete(@CourseTypeId int, @Message varchar(500) = '' output)
 as 
 begin 
     declare @Return int = 0;

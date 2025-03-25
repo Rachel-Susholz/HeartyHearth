@@ -10,5 +10,10 @@ begin
     from Recipe r
     join StaffMember sm
     on sm.StaffMemberId = r.StaffMemberId
-    order by RecipeName;
+    order by 
+  case 
+    when RecipeStatus = 'published' then 1
+    when RecipeStatus = 'drafted' then 2
+    when RecipeStatus = 'archived' then 3
+  end;
 end;

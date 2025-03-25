@@ -5,7 +5,7 @@ begin
 
     select @All = isnull(@All, 0), @RecipeIngredientId = isnull(@RecipeIngredientId,0), @RecipeId = isnull(@RecipeId,0)
 
-    select ri.RecipeIngredientId, ri.RecipeId, ri.IngredientId, ri.MeasurementId, ri.Amount, ri.IngredientSequence
+    select ri.RecipeIngredientId, ri.RecipeId, ri.IngredientId, ri.MeasurementId, Quantity = ri.Amount, Sequence = ri.IngredientSequence
     from RecipeIngredient ri
     where ri.RecipeIngredientId = @RecipeIngredientId
     or @All = 1

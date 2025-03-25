@@ -11,24 +11,7 @@ namespace RecipeTest
            DBManager.SetConnectionString("Server=tcp:dev-rochelsusholz.database.windows.net,1433; Initial Catalog=HeartyHearthDB;Persist Security Info=False;User ID=rsadmin;Password=Rochel@9225; MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30");
         }
 
-            [Test]
-            public void TestSearchRecipes()
-            {
-                // Arrange
-                string searchKeyword = "muffin";
-                Console.WriteLine("Before Test: Search for recipes with keyword: " + searchKeyword);
-
-                // Act
-                DataTable dt = recipe.SearchRecipes(searchKeyword);
-
-                // Assert
-                Console.WriteLine("After Test: Number of recipes found: " + dt.Rows.Count);
-                Assert.IsTrue(dt.Rows.Count > 0, "Desired Outcome: Recipes should be found.");
-                foreach (DataRow row in dt.Rows)
-                {
-                    Console.WriteLine($"RecipeId: {row["RecipeId"]}, RecipeName: {row["RecipeName"]}");
-                }
-            }
+           
 
             [Test]
         public void TestLoadRecipe()

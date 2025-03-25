@@ -1,6 +1,6 @@
 ﻿namespace HeartyHearthWinForm
 {
-    partial class frmMealList
+    partial class frmAutoCreateCookbook
     {
         /// <summary>
         /// Required designer variable.
@@ -29,51 +29,63 @@
         private void InitializeComponent()
         {
             tblMain = new TableLayoutPanel();
-            gMealList = new DataGridView();
+            btnCreateCookbook = new Button();
+            cbxUser = new ComboBox();
             tblMain.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)gMealList).BeginInit();
             SuspendLayout();
             // 
             // tblMain
             // 
-            tblMain.ColumnCount = 1;
+            tblMain.ColumnCount = 2;
             tblMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tblMain.Controls.Add(gMealList, 0, 0);
+            tblMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tblMain.Controls.Add(btnCreateCookbook, 1, 0);
+            tblMain.Controls.Add(cbxUser, 0, 0);
             tblMain.Dock = DockStyle.Fill;
             tblMain.Location = new Point(0, 0);
             tblMain.Name = "tblMain";
             tblMain.RowCount = 1;
-            tblMain.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tblMain.Size = new Size(800, 450);
+            tblMain.RowStyles.Add(new RowStyle());
+            tblMain.Size = new Size(800, 151);
             tblMain.TabIndex = 0;
             // 
-            // gMealList
+            // btnCreateCookbook
             // 
-            gMealList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            gMealList.Dock = DockStyle.Fill;
-            gMealList.Location = new Point(3, 3);
-            gMealList.Name = "gMealList";
-            gMealList.RowHeadersWidth = 51;
-            gMealList.RowTemplate.Height = 29;
-            gMealList.Size = new Size(794, 444);
-            gMealList.TabIndex = 0;
+            btnCreateCookbook.Anchor = AnchorStyles.None;
+            btnCreateCookbook.AutoSize = true;
+            btnCreateCookbook.Location = new Point(533, 60);
+            btnCreateCookbook.Name = "btnCreateCookbook";
+            btnCreateCookbook.Size = new Size(134, 30);
+            btnCreateCookbook.TabIndex = 0;
+            btnCreateCookbook.Text = "Create Cookbook";
+            btnCreateCookbook.UseVisualStyleBackColor = true;
             // 
-            // frmMealList
+            // cbxUser
+            // 
+            cbxUser.Anchor = AnchorStyles.None;
+            cbxUser.FormattingEnabled = true;
+            cbxUser.Location = new Point(124, 58);
+            cbxUser.Name = "cbxUser";
+            cbxUser.Size = new Size(151, 28);
+            cbxUser.TabIndex = 1;
+            // 
+            // frmAutoCreateCookbook
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(800, 151);
             Controls.Add(tblMain);
-            Name = "frmMealList";
-            Text = "Meal List";
+            Name = "frmAutoCreateCookbook";
+            Text = "frmAutoCreateCookbook";
             tblMain.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)gMealList).EndInit();
+            tblMain.PerformLayout();
             ResumeLayout(false);
         }
 
         #endregion
 
         private TableLayoutPanel tblMain;
-        private DataGridView gMealList;
+        private Button btnCreateCookbook;
+        private ComboBox cbxUser;
     }
 }

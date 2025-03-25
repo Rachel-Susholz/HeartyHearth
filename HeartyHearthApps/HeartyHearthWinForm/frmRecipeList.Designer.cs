@@ -28,16 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             tblMain = new TableLayoutPanel();
             btnNewRecipe = new Button();
             gRecipeList = new DataGridView();
-            colRecipeName = new DataGridViewTextBoxColumn();
-            colStatus = new DataGridViewTextBoxColumn();
-            colUser = new DataGridViewTextBoxColumn();
-            colCalories = new DataGridViewTextBoxColumn();
-            colIngredients = new DataGridViewTextBoxColumn();
             tblMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gRecipeList).BeginInit();
             SuspendLayout();
@@ -70,74 +63,14 @@
             // 
             // gRecipeList
             // 
-            gRecipeList.AllowUserToAddRows = false;
-            gRecipeList.AllowUserToDeleteRows = false;
-            gRecipeList.AllowUserToResizeColumns = false;
-            gRecipeList.AllowUserToResizeRows = false;
-            gRecipeList.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle1.BackColor = SystemColors.Control;
-            dataGridViewCellStyle1.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point);
-            dataGridViewCellStyle1.ForeColor = SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            gRecipeList.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             gRecipeList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            gRecipeList.Columns.AddRange(new DataGridViewColumn[] { colRecipeName, colStatus, colUser, colCalories, colIngredients });
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle2.BackColor = SystemColors.Window;
-            dataGridViewCellStyle2.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point);
-            dataGridViewCellStyle2.ForeColor = SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-            gRecipeList.DefaultCellStyle = dataGridViewCellStyle2;
             gRecipeList.Dock = DockStyle.Fill;
             gRecipeList.Location = new Point(3, 47);
             gRecipeList.Name = "gRecipeList";
-            gRecipeList.ReadOnly = true;
-            gRecipeList.RowHeadersVisible = false;
             gRecipeList.RowHeadersWidth = 51;
             gRecipeList.RowTemplate.Height = 29;
-            gRecipeList.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             gRecipeList.Size = new Size(794, 400);
             gRecipeList.TabIndex = 1;
-            // 
-            // colRecipeName
-            // 
-            colRecipeName.HeaderText = "Recipe Name";
-            colRecipeName.MinimumWidth = 6;
-            colRecipeName.Name = "colRecipeName";
-            colRecipeName.ReadOnly = true;
-            // 
-            // colStatus
-            // 
-            colStatus.HeaderText = "RecipeStatus";
-            colStatus.MinimumWidth = 6;
-            colStatus.Name = "colStatus";
-            colStatus.ReadOnly = true;
-            // 
-            // colUser
-            // 
-            colUser.HeaderText = "User";
-            colUser.MinimumWidth = 6;
-            colUser.Name = "colUser";
-            colUser.ReadOnly = true;
-            // 
-            // colCalories
-            // 
-            colCalories.HeaderText = "Calories";
-            colCalories.MinimumWidth = 6;
-            colCalories.Name = "colCalories";
-            colCalories.ReadOnly = true;
-            // 
-            // colIngredients
-            // 
-            colIngredients.HeaderText = "Num Ingredients";
-            colIngredients.MinimumWidth = 6;
-            colIngredients.Name = "colIngredients";
-            colIngredients.ReadOnly = true;
             // 
             // frmRecipeList
             // 
@@ -158,10 +91,5 @@
         private TableLayoutPanel tblMain;
         private Button btnNewRecipe;
         private DataGridView gRecipeList;
-        private DataGridViewTextBoxColumn colRecipeName;
-        private DataGridViewTextBoxColumn colStatus;
-        private DataGridViewTextBoxColumn colUser;
-        private DataGridViewTextBoxColumn colCalories;
-        private DataGridViewTextBoxColumn colIngredients;
     }
 }

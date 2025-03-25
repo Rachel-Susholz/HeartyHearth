@@ -1,4 +1,4 @@
-﻿using HeartyHearthSystem;
+﻿using System.ComponentModel;
 
 namespace HeartyHearthWinForm
 {
@@ -7,7 +7,9 @@ namespace HeartyHearthWinForm
         private enum TableTypeEnum { StaffMember, Cuisine, Ingredient, Measurement, CourseType }
         DataTable dtlist = new();
         TableTypeEnum currenttabletype = TableTypeEnum.StaffMember;
-        string deletecolumnname = "deletecolumn";
+        string deleteColumnName = "deletecolumn";
+        private BindingSource bsData = new BindingSource();
+
         public frmDataMaintenance()
         {
             InitializeComponent();
@@ -18,26 +20,54 @@ namespace HeartyHearthWinForm
             BindData(currenttabletype);
         }
 
-       
-
-        private void BindData(TableTypeEnum tabletype)
+        private void BindData(TableTypeEnum tableType)
         {
-            currenttabletype = tabletype;
-            dtlist = DataMaintenance.GetDataList(currenttabletype.ToString());
-            gData.Columns.Clear();
-            gData.DataSource = dtlist;
-            gData.Columns.Add(new DataGridViewButtonColumn() { Text = "X", HeaderText = "Delete", Name = deletecolumnname, UseColumnTextForButtonValue = true });
-            WindowsFormsUtility.FormatGridForEdit(gData, currenttabletype.ToString());
+            currenttabletype = tableType;
+            dtlist = DataMaintenance.GetDataList(tableType.ToString());
+            dtlist.AcceptChanges();
+
+            bsData.DataSource = dtlist;
+            bsData.ListChanged -= BsData_ListChanged;
+            bsData.ListChanged += BsData_ListChanged;
+
+            gData.DataSource = bsData;
+
+            if (gData.Columns.Contains(deleteColumnName))
+                gData.Columns.Remove(deleteColumnName);
+            WindowsFormsUtility.AddDeleteButtonToGrid(gData, deleteColumnName);
+            WindowsFormsUtility.FormatGridForEdit(gData, tableType.ToString());
+
+            gData.EditingControlShowing += gData_EditingControlShowing;
+
+            btnSave.Enabled = false;
+        }
+
+        private void BsData_ListChanged(object sender, ListChangedEventArgs e)
+        {
+            btnSave.Enabled = true;
+        }
+
+        private void gData_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+        {
+            if (e.Control is TextBox tb)
+            {
+                tb.TextChanged += EditingControl_TextChanged;
+            }
+        }
+
+        private void EditingControl_TextChanged(object sender, EventArgs e)
+        {
+            btnSave.Enabled = true;
         }
 
         private bool Save()
         {
-            bool b = false;
+            bool success = false;
             Cursor = Cursors.WaitCursor;
             try
             {
                 DataMaintenance.SaveDataList(dtlist, currenttabletype.ToString());
-                b = true;
+                success = true;
             }
             catch (Exception ex)
             {
@@ -47,52 +77,62 @@ namespace HeartyHearthWinForm
             {
                 Cursor = Cursors.Default;
             }
-            return b;
+            return success;
         }
 
-        private void Delete(int rowindex)
+        private void BtnSave_Click(object sender, EventArgs e)
+        { 
+            MessageBox.Show("Saved!", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            dtlist.AcceptChanges();
+            btnSave.Enabled = false;
+        }
+
+        private void Delete(int rowIndex)
         {
-            int id = WindowsFormsUtility.GetIdFromGrid(gData, rowindex, currenttabletype.ToString() + "Id");
-
-            if (id == 0 && rowindex < gData.Rows.Count)
-            {
-                gData.Rows.Remove(gData.Rows[rowindex]); 
+            if (rowIndex < 0 || rowIndex >= gData.Rows.Count)
                 return;
-            }
 
-            if (id != 0)
-            { }
-                string message = "Are you sure you want to delete this record?";
-                if (currenttabletype == TableTypeEnum.StaffMember)
-                {
-                    message = "Are you sure you want to delete this user and all related recipes, meals, and cookbooks?";
-                }
+            int id = WindowsFormsUtility.GetIdFromGrid(gData, rowIndex, currenttabletype.ToString() + "Id");
 
-                DialogResult result = MessageBox.Show(message, "Confirm Deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (result == DialogResult.No)
-                {
-                    return;
-                }
+            string msg = (currenttabletype == TableTypeEnum.StaffMember)
+                ? "Are you sure you want to delete this user and all related recipes, meals, and cookbooks?"
+                : "Are you sure you want to delete this record?";
 
+            if (MessageBox.Show(msg, "Confirm Deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+            {
                 try
                 {
-                    DataMaintenance.DeleteRow(currenttabletype.ToString(), id); 
-                    BindData(currenttabletype); 
+                    DataMaintenance.DeleteRow(currenttabletype.ToString(), id);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, Application.ProductName);
+                    MessageBox.Show("Delete error: " + ex.Message, Application.ProductName);
+                    return;
                 }
+                BindData(currenttabletype);
+                btnSave.Enabled = true;
             }
-        
+        }
+
+        private void GData_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex >= 0 && gData.Columns[e.ColumnIndex].Name == deleteColumnName)
+            {
+                Delete(e.RowIndex);
+            }
+        }
 
         private void SetUpRadioButtons()
         {
             foreach (Control c in pnlOptionButtons.Controls)
             {
-                if (c is RadioButton)
+                if (c is RadioButton rb)
                 {
-                    c.Click += C_Click;
+                    rb.Click += (s, e) =>
+                    {
+                        if (rb.Tag is TableTypeEnum type)
+                            BindData(type);
+                    };
                 }
             }
             optUsers.Tag = TableTypeEnum.StaffMember;
@@ -102,50 +142,26 @@ namespace HeartyHearthWinForm
             optCourses.Tag = TableTypeEnum.CourseType;
         }
 
-        private void C_Click(object? sender, EventArgs e)
+        private void FrmDataMaintenance_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (sender is Control && ((Control)sender).Tag is TableTypeEnum)
+            if (SQLUtility.DoesTableHaveChanges(dtlist))
             {
-                BindData((TableTypeEnum)((Control)sender).Tag);
-            }
-        }
-
-        private void BtnSave_Click(object? sender, EventArgs e)
-        {
-            Save();
-        }
-
-        private void FrmDataMaintenance_FormClosing(object? sender, FormClosingEventArgs e)
-        {
-            if (SQLUtility.DoesTableHaveChanges(dtlist) == true)
-            {
-                var res = MessageBox.Show($"Do you want to save changes to {this.Text} before closing the form?", Application.ProductName, MessageBoxButtons.YesNoCancel);
-
-                switch (res)
+                var res = MessageBox.Show($"Do you want to save changes to {this.Text} before closing?",
+                    Application.ProductName, MessageBoxButtons.YesNoCancel);
+                if (res == DialogResult.Yes)
                 {
-                    case DialogResult.Yes:
-                        bool b = Save();
-                        if (b == false)
-                        {
-                            e.Cancel = true;
-                            this.Activate();
-                        }
-                        break;
-                    case DialogResult.Cancel:
+                    if (!Save())
+                    {
                         e.Cancel = true;
                         this.Activate();
-                        break;
+                    }
+                }
+                else if (res == DialogResult.Cancel)
+                {
+                    e.Cancel = true;
+                    this.Activate();
                 }
             }
-
         }
-        private void GData_CellContentClick(object? sender, DataGridViewCellEventArgs e)
-        {
-            if (gData.Columns[e.ColumnIndex].Name == deletecolumnname)
-            {
-                Delete(e.RowIndex);
-            }
-        }
-        
     }
 }

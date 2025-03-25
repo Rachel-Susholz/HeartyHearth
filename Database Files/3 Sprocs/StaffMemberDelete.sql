@@ -1,9 +1,9 @@
 create or alter procedure dbo.StaffMemberDelete(@StaffMemberId int, @Message varchar(500) = '' output)
 as 
 begin 
+    set nocount on
     declare @Return int = 0
 
-    -- Check if staff member exists
     if not exists (select 1 from StaffMember where StaffMemberId = @StaffMemberId)
     begin
         select @Return = 1, @Message = 'Staff member does not exist.'
@@ -13,27 +13,24 @@ begin
     begin try 
         begin tran
 
-        -- Delete related recipes
-        delete from RecipeDirection where RecipeId in (select RecipeId from Recipe where StaffMemberId = @StaffMemberId);
-        delete from RecipeIngredient where RecipeId in (select RecipeId from Recipe where StaffMemberId = @StaffMemberId);
-        delete from Recipe where StaffMemberId = @StaffMemberId;
+        delete from RecipeDirection where RecipeId in (select RecipeId from Recipe where StaffMemberId = @StaffMemberId)
+        delete from RecipeIngredient where RecipeId in (select RecipeId from Recipe where StaffMemberId = @StaffMemberId)
+        delete from CourseRecipe where RecipeId in (select RecipeId from Recipe where StaffMemberId = @StaffMemberId)
+        delete from CookbookRecipe where RecipeId in (select RecipeId from Recipe where StaffMemberId = @StaffMemberId)
+        or CookbookId in (select CookbookId from Cookbook where StaffMemberId = @StaffMemberId)
+        delete from Recipe where StaffMemberId = @StaffMemberId
+        delete from CourseRecipe where MealCourseId in (select MealCourseId from MealCourse where MealId in (select MealId from Meal where StaffMemberId = @StaffMemberId))
+        delete from MealCourse where MealId in (select MealId from Meal where StaffMemberId = @StaffMemberId)
+        delete from Meal where StaffMemberId = @StaffMemberId 
+        delete from Cookbook where StaffMemberId = @StaffMemberId
 
-        -- Delete related meals
-        delete from MealRecipe where MealId in (select MealId from Meal where StaffMemberId = @StaffMemberId);
-        delete from Meal where StaffMemberId = @StaffMemberId;
+        delete from StaffMember where StaffMemberId = @StaffMemberId
 
-        -- Delete related cookbooks
-        delete from CookbookRecipe where CookbookId in (select CookbookId from Cookbook where StaffMemberId = @StaffMemberId);
-        delete from Cookbook where StaffMemberId = @StaffMemberId;
-
-        -- Finally, delete the staff member
-        delete from StaffMember where StaffMemberId = @StaffMemberId;
-
-        commit
+        commit tran
     end try 
     begin catch 
-        rollback;
-        select @Return = 1, @Message = 'Error deleting staff member. Please try again.';
+        rollback
+        select @Return = 1, @Message = 'Error deleting staff member. Please try again.' + error_Message()
     end catch
 
     return @Return
