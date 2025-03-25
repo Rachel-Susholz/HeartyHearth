@@ -34,9 +34,3 @@ begin
     return @return;
 end
 go
-
-
-exec dbo.CookbookUpdate @CookbookId = 0, @CookbookName = 'Test', @Price = 10, @CookbookStatus = 0, @Created = getdate(), @StaffMemberId = 1, @message = '' output
-
-
-

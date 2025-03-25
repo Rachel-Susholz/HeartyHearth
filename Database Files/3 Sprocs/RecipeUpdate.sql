@@ -3,7 +3,7 @@ create or alter proc dbo.RecipeUpdate(
     @CuisineId int,
     @RecipeName varchar(150),
     @Calories int,
-    @Drafted datetime = null,
+    @Drafted datetime output,
     @Published datetime = null,
     @Archived datetime = null,
     @StaffMemberId int,
@@ -28,7 +28,10 @@ begin
         set 
         CuisineId = @CuisineId, 
         RecipeName = @RecipeName, 
-        Calories = @Calories, 
+        Calories = @Calories,
+        Drafted = @Drafted,  
+        Published = @Published,  
+        Archived = @Archived,   
         StaffMemberId = @StaffMemberId
         where RecipeId = @RecipeId
     end
