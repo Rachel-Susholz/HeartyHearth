@@ -40,28 +40,6 @@
                 }
             };
         }
-        public static void AttachDeleteButtonHandler(DataGridView grid, string deleteColumnName, string confirmMessage, Func<int, bool> canDelete, Action<int> deleteAction)
-        {
-            grid.CellContentClick += (sender, e) =>
-            {
-                if (e.RowIndex < 0 || e.ColumnIndex < 0)
-                    return;
-                if (grid.Columns[e.ColumnIndex].Name == deleteColumnName)
-                {
-                    // Check if the row can be deleted.
-                    if (!canDelete(e.RowIndex))
-                    {
-                        MessageBox.Show("Cannot delete placeholder row", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return;
-                    }
-                    var res = MessageBox.Show(confirmMessage, "Confirm Delete", MessageBoxButtons.YesNo);
-                    if (res == DialogResult.Yes)
-                    {
-                        deleteAction(e.RowIndex);
-                    }
-                }
-            };
-        }
 
     }
 }

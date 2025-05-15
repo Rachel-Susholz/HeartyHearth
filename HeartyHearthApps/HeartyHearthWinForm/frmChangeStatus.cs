@@ -9,7 +9,12 @@
         {
             InitializeComponent();
             RecipeId = recipeId;
-            this.Load += (s, e) => LoadRecipeData();
+
+            btnDraft.Click += btnDraft_Click;
+            btnPublish.Click += btnPublish_Click;
+            btnArchive.Click += btnArchive_Click;
+
+            Load += (s, e) => LoadRecipeData();
         }
 
         void LoadRecipeData()
@@ -18,36 +23,53 @@
             if (dtRecipe.Rows.Count == 0)
             {
                 MessageBox.Show("Recipe not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
+                Close();
                 return;
             }
-            DataRow row = dtRecipe.Rows[0];
-            lblRecipeName.Text = row["RecipeName"].ToString();
-            lblDrafted.Text = "Drafted: " +
-                (row["Drafted"] == DBNull.Value ? "N/A" : Convert.ToDateTime(row["Drafted"]).ToShortDateString());
-            lblPublished.Text = "Published: " +
-                (row["Published"] == DBNull.Value ? "N/A" : Convert.ToDateTime(row["Published"]).ToShortDateString());
-            lblArchived.Text = "Archived: " +
-                (row["Archived"] == DBNull.Value ? "N/A" : Convert.ToDateTime(row["Archived"]).ToShortDateString());
 
-            string currentStatus = row["RecipeStatus"].ToString();
-            lblCurrentStatus.Text = "Current Status: " + currentStatus;
-            btnDraft.Enabled = !currentStatus.Equals("Drafted", StringComparison.OrdinalIgnoreCase);
-            btnPublish.Enabled = !currentStatus.Equals("Published", StringComparison.OrdinalIgnoreCase);
-            btnArchive.Enabled = !currentStatus.Equals("Archived", StringComparison.OrdinalIgnoreCase);
+            var row = dtRecipe.Rows[0];
+            lblRecipeName.Text = row["RecipeName"].ToString();
+
+            lblDrafted.Text = row["Drafted"] == DBNull.Value
+                               ? "N/A"
+                               : Convert.ToDateTime(row["Drafted"]).ToShortDateString();
+
+            lblPublished.Text = row["Published"] == DBNull.Value
+                               ? "N/A"
+                               : Convert.ToDateTime(row["Published"]).ToShortDateString();
+
+            lblArchived.Text = row["Archived"] == DBNull.Value
+                               ? "N/A"
+                               : Convert.ToDateTime(row["Archived"]).ToShortDateString();
+
+            var status = row["RecipeStatus"].ToString();
+            lblCurrentStatus.Text = "Current Status: " + status;
+
+            btnDraft.Enabled = !status.Equals("Drafted", StringComparison.OrdinalIgnoreCase);
+            btnPublish.Enabled = !status.Equals("Published", StringComparison.OrdinalIgnoreCase);
+            btnArchive.Enabled = !status.Equals("Archived", StringComparison.OrdinalIgnoreCase);
         }
 
-        void AttemptStatusChangeAndClose(string newstatus)
+        void AttemptStatusChangeAndClose(string newStatus)
         {
-            if (MessageBox.Show($"Are you sure you want to change this recipe to {newstatus}?",
-                "Confirm Status Change", MessageBoxButtons.YesNo) != DialogResult.Yes)
-                return;
+            if (MessageBox.Show(
+                    $"Are you sure you want to change this recipe to {newStatus}?",
+                    "Confirm Status Change",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                ) != DialogResult.Yes) return;
+
             try
             {
-                recipe.ChangeStatus(RecipeId, newstatus);
-                MessageBox.Show("Status changed successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                recipe.ChangeStatus(RecipeId, newStatus);
+                MessageBox.Show(
+                    "Status changed successfully",
+                    "Success",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
                 RecipeEvents.RaiseRecipeStatusChanged();
-                this.Close();
+                Close();
             }
             catch (Exception ex)
             {
@@ -56,16 +78,12 @@
         }
 
         private void btnDraft_Click(object sender, EventArgs e)
-        {
-            AttemptStatusChangeAndClose("Drafted");
-        }
+            => AttemptStatusChangeAndClose("Drafted");
+
         private void btnPublish_Click(object sender, EventArgs e)
-        {
-            AttemptStatusChangeAndClose("Published");
-        }
+            => AttemptStatusChangeAndClose("Published");
+
         private void btnArchive_Click(object sender, EventArgs e)
-        {
-            AttemptStatusChangeAndClose("Archived");
-        }
+            => AttemptStatusChangeAndClose("Archived");
     }
 }

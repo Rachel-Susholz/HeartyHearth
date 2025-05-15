@@ -2,233 +2,253 @@
 {
     public partial class frmCookbookInfo : MultiFormBase
     {
-        private DataTable dtCookbook, dtCookbookRecipes;
-        const string deleteCol = "deletecol";
-        bool bFormBounded = false;
+        private DataTable dtCookbook, dtRecipes;
+        private const string DeleteCol = "deletecol";
 
         public frmCookbookInfo(int id)
         {
             InitializeComponent();
-            PrimaryKeyId = id; // cookbookId
-            this.Tag = PrimaryKeyId;
+            PrimaryKeyId = id;
+
+            Text = id == 0
+                ? "Cookbook - New Cookbook"
+                : "Cookbook -";
+
+            Load += OnLoad;
             btnSave.Click += BtnSave_Click;
             btnDelete.Click += BtnDelete_Click;
             btnSaveRecipe.Click += BtnSaveRecipe_Click;
-            this.Shown += FrmCookbookInfo_Shown;
-            this.FormClosing += FrmCookbookInfo_FormClosing;
+
+            lstUserName.DropDownStyle = ComboBoxStyle.DropDownList;
+            txtCreated.ReadOnly = true;
         }
 
-        private void FrmCookbookInfo_Shown(object sender, EventArgs e)
+        private void OnLoad(object sender, EventArgs e)
         {
-            this.Text = (PrimaryKeyId == 0) ? "New Cookbook" : $"Cookbook - {GetCookbookDesc()}";
-            LoadForm(PrimaryKeyId);
-            SetupRecipesGrid();
+            LoadCookbook();
+            LoadRecipesGrid();
+            UpdateButtons();
         }
 
-        public void LoadForm(int id)
+        private void LoadCookbook()
         {
-            PrimaryKeyId = id;
-            this.Tag = PrimaryKeyId;
             dtCookbook = cookbook.LoadCookbook(PrimaryKeyId);
+
             if (dtCookbook.Rows.Count == 0)
             {
-                DataRow newRow = dtCookbook.NewRow();
-                newRow["CookbookName"] = "";
-                newRow["Price"] = 0.00m;
-                newRow["CookbookStatus"] = true;
-                newRow["Created"] = DateTime.Now;
-                newRow["StaffMemberId"] = 0;
-                dtCookbook.Rows.Add(newRow);
+                var r = dtCookbook.NewRow();
+                r["CookbookName"] = "";
+                r["Price"] = 0m;
+                r["CookbookStatus"] = false;
+                r["Created"] = DBNull.Value;
+                r["StaffMemberId"] = 0;
+                dtCookbook.Rows.Add(r);
             }
+
             BindSource.DataSource = dtCookbook;
-            if (!bFormBounded)
-            {
-                WindowsFormsUtility.BindHeaderControls(BindSource, txtCookbookName, txtPrice);
-                WindowsFormsUtility.SetControlBinding(cbxCookbookStatus, BindSource);
-                WindowsFormsUtility.BindOutputDateControl(txtCreated, BindSource, "Created");
+            WindowsFormsUtility.SetControlBinding(txtCookbookName, BindSource);
 
-                DataTable dtUsers = recipe.GetUserList();
-                WindowsFormsUtility.SetListBinding(lstUserName, dtUsers, dtCookbook, "StaffMember");
-                bFormBounded = true;
-            }
-            this.Text = "Cookbook - " + GetCookbookDesc();
-            SetButtonsEnablesBasedOnNewRecord();
+            txtPrice.DataBindings.Clear();
+            txtPrice.DataBindings.Add("Text", BindSource, "Price", true, DataSourceUpdateMode.OnPropertyChanged, "0.00");
+            txtPrice.KeyPress += (s, ev) =>
+            {
+                if (!char.IsControl(ev.KeyChar)
+                    && !char.IsDigit(ev.KeyChar)
+                    && ev.KeyChar != '.')
+                    ev.Handled = true;
+                if (ev.KeyChar == '.' && txtPrice.Text.Contains("."))
+                    ev.Handled = true;
+            };
+
+            cbxCookbookStatus.DataBindings.Clear();
+            cbxCookbookStatus.DataBindings.Add("Checked", BindSource, "CookbookStatus", false, DataSourceUpdateMode.OnPropertyChanged);
+
+            WindowsFormsUtility.BindOutputDateControl(txtCreated, BindSource, "Created");
+
+            lstUserName.DataBindings.Clear();
+            WindowsFormsUtility.SetListBinding(lstUserName, recipe.GetUserList(), dtCookbook, "StaffMember");
+
+            dtCookbook.AcceptChanges();
+            UpdateTitle();
         }
 
-        private void SetupRecipesGrid()
+        private void LoadRecipesGrid()
         {
-            dtCookbookRecipes = CookbookRecipe.LoadByCookbookId(PrimaryKeyId);
-            if (dtCookbookRecipes.Columns.Contains("CookbookRecipeId"))
-            {
-                dtCookbookRecipes.Columns["CookbookRecipeId"].AutoIncrement = true;
-                dtCookbookRecipes.Columns["CookbookRecipeId"].AutoIncrementSeed = -1;
-                dtCookbookRecipes.Columns["CookbookRecipeId"].AutoIncrementStep = -1;
-            }
-            if (dtCookbookRecipes.Columns.Contains("RecipeSequence"))
-                dtCookbookRecipes.Columns["RecipeSequence"].ColumnName = "Sequence";
+            dtRecipes = CookbookRecipe.LoadByCookbookId(PrimaryKeyId);
+            if (dtRecipes.Columns.Contains("RecipeSequence"))
+                dtRecipes.Columns["RecipeSequence"].ColumnName = "Sequence";
+            dtRecipes.Columns["CookbookId"].DefaultValue = PrimaryKeyId;
 
-            for (int i = dtCookbookRecipes.Rows.Count - 1; i >= 0; i--)
-            {
-                int rid = (dtCookbookRecipes.Rows[i]["RecipeId"] == DBNull.Value) ? 0 : Convert.ToInt32(dtCookbookRecipes.Rows[i]["RecipeId"]);
-                if (rid == 0)
-                    dtCookbookRecipes.Rows.RemoveAt(i);
-            }
-            dtCookbookRecipes.AcceptChanges();
-            DataRow placeholder = dtCookbookRecipes.NewRow();
-            placeholder["RecipeId"] = 0;
-            placeholder["Sequence"] = DBNull.Value;
-            dtCookbookRecipes.Rows.Add(placeholder);
-
-            gCookbookRecipes.DataSource = dtCookbookRecipes;
-            gCookbookRecipes.AllowUserToAddRows = false;
-
-            DataTable dtRecipes = DataMaintenance.GetDataList("Recipe");
-            bool found = false;
-            foreach (DataRow r in dtRecipes.Rows)
-            {
-                int rid = (r["RecipeId"] == DBNull.Value) ? 0 : Convert.ToInt32(r["RecipeId"]);
-                if (rid == 0)
-                {
-                    r["RecipeName"] = "Add a recipe here";
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-            {
-                DataRow newRow = dtRecipes.NewRow();
-                newRow["RecipeId"] = 0;
-                newRow["RecipeName"] = "Add a recipe here";
-                dtRecipes.Rows.Add(newRow);
-            }
-
-            WindowsFormsUtility.AddComboBoxToGrid(gCookbookRecipes, dtRecipes, "RecipeName", "Recipe");
+            gCookbookRecipes.Columns.Clear();
+            gCookbookRecipes.DataSource = dtRecipes;
+            gCookbookRecipes.DataBindingComplete += Grid_DataBindingComplete;
             WindowsFormsUtility.FormatGridForEdit(gCookbookRecipes, "CookbookRecipe");
-            WindowsFormsUtility.AddDeleteButtonToGrid(gCookbookRecipes, deleteCol);
-            gCookbookRecipes.Columns[deleteCol].DisplayIndex = gCookbookRecipes.Columns.Count - 1;
+            WindowsFormsUtility.AddComboBoxToGrid(gCookbookRecipes, DataMaintenance.GetDataList("Recipe"), "RecipeName", "Recipe");
 
-            SetupRecipeGridEvents();
-            UpdatePrice();
-            WindowsFormsUtility.AcceptBaselineChanges(dtCookbook, dtCookbookRecipes);
-            if (this.MdiParent is frmMain mainForm)
-                mainForm.UpdateNavigation();
-        }
-
-        void SetupRecipeGridEvents()
-        {
-            GridHelper.AttachCellBeginEditHandler(
-                gCookbookRecipes,
-                new string[] { "Sequence" },
-                row => Convert.ToInt32(row.Cells["RecipeId"].Value) != 0,
-                "Cannot enter recipe sequence before entering recipe name");
-            GridHelper.AttachNumericKeyPressHandler(gCookbookRecipes, "Sequence");
-            GridHelper.AttachDeleteButtonHandler(
-            gCookbookRecipes,
-            deleteCol,
-            "Are you sure you want to delete this recipe?",
-            rowIndex => Convert.ToInt32(dtCookbookRecipes.Rows[rowIndex]["RecipeId"]) != 0,
-            rowIndex =>
-             {
-                dtCookbookRecipes.Rows.RemoveAt(rowIndex);
-                MessageBox.Show("Recipe deleted successfully", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                if (this.MdiParent is frmMain mainForm)
-                mainForm.UpdateNavigation();
-            });
-
-        }
-
-        string GetCookbookDesc() =>
-            (dtCookbook == null || dtCookbook.Rows.Count == 0 || dtCookbook.Rows[0]["CookbookName"] == DBNull.Value ||
-             string.IsNullOrWhiteSpace(dtCookbook.Rows[0]["CookbookName"].ToString()))
-            ? "New Cookbook" : dtCookbook.Rows[0]["CookbookName"].ToString();
-
-        void UpdatePrice()
-        {
-            int count = 0;
-            foreach (DataRow row in dtCookbookRecipes.Rows)
-                if (Convert.ToInt32(row["RecipeId"]) != 0)
-                    count++;
-            dtCookbook.Rows[0]["Price"] = count * 1.25m;
-        }
-
-        void SetButtonsEnablesBasedOnNewRecord()
-        {
-            bool isNew = PrimaryKeyId == 0 || string.IsNullOrWhiteSpace(dtCookbook.Rows[0]["CookbookName"].ToString());
-            btnDelete.Enabled = btnSaveRecipe.Enabled = !isNew;
-        }
-        bool SaveCookbookData()
-        {
-            Application.UseWaitCursor = true;
-            try
+            if (!gCookbookRecipes.Columns.Contains(DeleteCol))
             {
-                UpdatePrice();
-                if (Convert.ToDecimal(dtCookbook.Rows[0]["Price"]) <= 0)
+                var del = new DataGridViewButtonColumn
                 {
-                    MessageBox.Show("A cookbook must contain at least one recipe before saving.",
-                        Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    btnSaveRecipe.Enabled = true;
-                    return false;
-                }
-                cookbook.SaveCookbook(dtCookbook);
-                CookbookRecipe.Save(dtCookbookRecipes);
-                BindSource.ResetBindings(false);
-                this.Tag = SQLUtility.GetValueFromFirstRowAsInt(dtCookbook, "CookbookId");
-                this.Text = GetCookbookDesc();
-                MessageBox.Show("Saved!", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                SetButtonsEnablesBasedOnNewRecord();
-                return true;
+                    Name = DeleteCol,
+                    HeaderText = "Delete",
+                    Text = "X",
+                    UseColumnTextForButtonValue = true,
+                    FlatStyle = FlatStyle.Flat
+                };
+                gCookbookRecipes.Columns.Add(del);
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error saving cookbook: " + ex.Message, Application.ProductName);
-                return false;
-            }
-            finally { Application.UseWaitCursor = false; }
-        }
-        private void Delete()
-        {
-            if (MessageBox.Show($"Are you sure you want to delete {GetCookbookDesc()} and all related recipes?",
-                Application.ProductName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-            {
-                Application.UseWaitCursor = true;
-                try { cookbook.DeleteCookbook(dtCookbook); }
-                catch (Exception ex) { MessageBox.Show("Error deleting cookbook: " + ex.Message, Application.ProductName); }
-                finally { Application.UseWaitCursor = false; }
-                MessageBox.Show($"{GetCookbookDesc()} successfully deleted", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                if (this.MdiParent is frmMain mainForm)
-                    mainForm.UpdateNavigation();
-                this.Close();
-            }
-        }
-        void BtnSave_Click(object sender, EventArgs e) => SaveCookbookData();
 
-        void BtnDelete_Click(object sender, EventArgs e) => Delete();
+            gCookbookRecipes.AllowUserToAddRows = true;
+            GridHelper.AttachNumericKeyPressHandler(gCookbookRecipes, "Sequence");
 
-        void BtnSaveRecipe_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                CookbookRecipe.Save(dtCookbookRecipes);
-                MessageBox.Show("Saved!", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error saving cookbook recipes: " + ex.Message, Application.ProductName);
-            }
+            gCookbookRecipes.CellContentClick += Grid_CellContentClick;
         }
 
-        protected override DataTable[] GetDataTablesForChangeCheck()
+        private void Grid_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            return new DataTable[] { dtCookbook };
+            var row = gCookbookRecipes.Rows[e.RowIndex];
+            var cell = row.Cells[DeleteCol];
+            if (cell.ReadOnly) return;
+
+            MessageBox.Show(
+                "Are you sure you want to delete this recipe?",
+                "Confirm Delete",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            ).OnlyIfYes(() =>
+            {
+                ((DataRowView)row.DataBoundItem).Row.Delete();
+                dtRecipes.AcceptChanges();
+                UpdateDeleteButtons();
+            });
         }
+
+        private void Grid_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            gCookbookRecipes.Columns["RecipeCombo"].DisplayIndex = 0;
+            gCookbookRecipes.Columns["Sequence"].DisplayIndex = 1;
+            gCookbookRecipes.Columns[DeleteCol].DisplayIndex =
+                gCookbookRecipes.Columns.Count - 1;
+
+            int delIdx = gCookbookRecipes.Columns[DeleteCol].Index;
+            foreach (DataGridViewRow row in gCookbookRecipes.Rows)
+            {
+                var drv = row.DataBoundItem as DataRowView;
+                bool canDelete = drv != null && drv.Row.RowState == DataRowState.Unchanged;
+
+                var cell = (DataGridViewButtonCell)row.Cells[delIdx];
+                cell.ReadOnly = !canDelete;
+                cell.Style.ForeColor = canDelete ? Color.Black : Color.Gray;
+                cell.Style.BackColor = canDelete
+                    ? gCookbookRecipes.DefaultCellStyle.BackColor
+                    : SystemColors.Control;
+                cell.Style.SelectionBackColor = cell.Style.BackColor;
+                cell.Value = canDelete ? "X" : "";
+            }
+        }
+
+        private void UpdateDeleteButtons()
+        {
+            int idx = gCookbookRecipes.Columns[DeleteCol].Index;
+
+            foreach (DataGridViewRow row in gCookbookRecipes.Rows)
+            {
+                var drv = row.DataBoundItem as DataRowView;
+                bool canDelete = drv != null
+                                 && drv.Row.RowState == DataRowState.Unchanged;
+
+                var cell = (DataGridViewButtonCell)row.Cells[idx];
+                cell.ReadOnly = !canDelete;
+                cell.Style.ForeColor = canDelete ? Color.Black : Color.Gray;
+                cell.Style.BackColor = canDelete
+                    ? gCookbookRecipes.DefaultCellStyle.BackColor
+                    : SystemColors.Control;
+                cell.Style.SelectionBackColor = cell.Style.BackColor;
+                cell.Value = canDelete ? "X" : "";
+            }
+        }
+
+        private void BtnSaveRecipe_Click(object s, EventArgs e)
+        {
+            foreach (DataRow r in dtRecipes.Rows.Cast<DataRow>()
+                     .Where(r => r.RowState == DataRowState.Added
+                                 && !r.IsNull("Sequence")))
+                r["CookbookId"] = PrimaryKeyId;
+
+            CookbookRecipe.Save(dtRecipes);
+            dtRecipes.AcceptChanges();
+            UpdateDeleteButtons();
+
+            MessageBox.Show(
+                "Cookbook recipes saved!",
+                "Save",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
+        }
+
+        private void BtnSave_Click(object s, EventArgs e)
+        {
+            if (dtCookbook.Rows[0]["Created"] == DBNull.Value)
+                dtCookbook.Rows[0]["Created"] = DateTime.Now;
+
+            cookbook.SaveCookbook(dtCookbook);
+            dtCookbook.AcceptChanges();
+            PrimaryKeyId = SQLUtility.GetValueFromFirstRowAsInt(dtCookbook, "CookbookId");
+
+            LoadCookbook();
+            LoadRecipesGrid();
+            MessageBox.Show(
+                "Cookbook saved!",
+                "Save",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
+            UpdateButtons();
+        }
+
+        private void BtnDelete_Click(object s, EventArgs e)
+        {
+            MessageBox.Show(
+                $"Delete “{GetTitle()}” and its recipes?",
+                "Confirm Delete",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning
+            ).OnlyIfYes(() =>
+            {
+                cookbook.DeleteCookbook(dtCookbook);
+                Close();
+            });
+        }
+
+        private void UpdateTitle() => Text = $"Cookbook - {GetTitle()}";
+        private string GetTitle()
+        {
+            var name = (dtCookbook.Rows[0]["CookbookName"] as string)?.Trim();
+            return string.IsNullOrEmpty(name) ? "New Cookbook" : name;
+        }
+
+        private void UpdateButtons()
+        {
+            bool isNew = PrimaryKeyId == 0 || GetTitle() == "New Cookbook";
+            btnDelete.Enabled = !isNew;
+            btnSaveRecipe.Enabled = !isNew;
+        }
+
+        protected override DataTable[] GetDataTablesForChangeCheck() =>
+            new[] { dtCookbook, dtRecipes };
 
         protected override bool SaveData()
         {
-            return SaveCookbookData();
+            BtnSave_Click(this, EventArgs.Empty);
+            return PrimaryKeyId != 0;
         }
-
-        private void FrmCookbookInfo_FormClosing(object sender, FormClosingEventArgs e)
+    }
+    static class DialogExtensions
+    {
+        public static void OnlyIfYes(this DialogResult r, Action yes)
         {
+            if (r == DialogResult.Yes) yes();
         }
     }
 }

@@ -116,6 +116,7 @@
             gDashboard.DefaultCellStyle = dataGridViewCellStyle2;
             gDashboard.Location = new Point(250, 130);
             gDashboard.Name = "gDashboard";
+            gDashboard.ReadOnly = true;
             gDashboard.RowHeadersVisible = false;
             gDashboard.RowHeadersWidth = 51;
             gDashboard.RowTemplate.Height = 29;
@@ -184,7 +185,7 @@
             Controls.Add(tblMain);
             Name = "frmDashboard";
             Text = "Hearty Hearth - Dashboard";
-            Load += this.frmDashboard_Load;
+            Load += frmDashboard_Load;
             tblMain.ResumeLayout(false);
             tblMain.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)gDashboard).EndInit();

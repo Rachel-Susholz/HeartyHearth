@@ -1,4 +1,7 @@
 ﻿using System.ComponentModel;
+using System.Text.RegularExpressions;
+using System.Data;
+using System.Drawing;
 
 namespace HeartyHearthWinForm
 {
@@ -49,15 +52,19 @@ namespace HeartyHearthWinForm
 
         private void gData_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
         {
-            if (e.Control is TextBox tb)
+            if (e.Control is TextBox oldTb)
+                oldTb.KeyPress -= NumericKeyPress;
+            if (gData.CurrentCell.OwningColumn.Name == "CourseSequence"
+             && e.Control is TextBox tb)
             {
-                tb.TextChanged += EditingControl_TextChanged;
+                tb.KeyPress += NumericKeyPress;
             }
         }
 
-        private void EditingControl_TextChanged(object sender, EventArgs e)
+        private void NumericKeyPress(object sender, KeyPressEventArgs e)
         {
-            btnSave.Enabled = true;
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+                e.Handled = true;
         }
 
         private bool Save()
@@ -81,9 +88,10 @@ namespace HeartyHearthWinForm
         }
 
         private void BtnSave_Click(object sender, EventArgs e)
-        { 
+        {
+            if (!Save()) return;    
             MessageBox.Show("Saved!", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            dtlist.AcceptChanges();
+            dtlist.AcceptChanges();     
             btnSave.Enabled = false;
         }
 
@@ -116,10 +124,20 @@ namespace HeartyHearthWinForm
 
         private void GData_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.ColumnIndex >= 0 && gData.Columns[e.ColumnIndex].Name == deleteColumnName)
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
+
+            if (gData.Columns[e.ColumnIndex].Name != deleteColumnName) return;
+
+            var row = gData.Rows[e.RowIndex];
+            var drv = row.DataBoundItem as DataRowView;
+            bool isUnsaved = row.IsNewRow
+                || (drv != null && drv.Row.RowState == DataRowState.Added);
+            if (isUnsaved)
             {
-                Delete(e.RowIndex);
+                return;
             }
+
+            Delete(e.RowIndex);
         }
 
         private void SetUpRadioButtons()

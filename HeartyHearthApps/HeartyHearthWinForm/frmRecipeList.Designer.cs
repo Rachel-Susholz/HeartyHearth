@@ -34,6 +34,8 @@
             tblMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gRecipeList).BeginInit();
             SuspendLayout();
+            gRecipeList.AllowUserToAddRows = false;
+            gRecipeList.ReadOnly = true;
             // 
             // tblMain
             // 

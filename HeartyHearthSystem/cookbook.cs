@@ -29,16 +29,33 @@
             DataRow r = dt.Rows[0];
             SQLUtility.SaveDataRow(r, sprocName);
         }
-        public static void SaveCookbook(DataTable dtCookbook)
+        public static bool SaveCookbook(DataTable dtCookbook)
         {
-            SaveRow(dtCookbook, "CookbookUpdate");
+            try
+            {
+                SaveRow(dtCookbook, "CookbookUpdate");
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
-        public static void DeleteCookbook(DataTable dtCookbook)
+        public static bool DeleteCookbook(DataTable dtCookbook)
         {
             int id = (int)dtCookbook.Rows[0]["CookbookId"];
             SqlCommand cmd = SQLUtility.GetSqlCommand("CookbookDelete");
             SQLUtility.SetParamValue(cmd, "@CookbookId", id);
-            SQLUtility.ExecuteSQL(cmd);
+
+            try
+            {
+                SQLUtility.ExecuteSQL(cmd);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

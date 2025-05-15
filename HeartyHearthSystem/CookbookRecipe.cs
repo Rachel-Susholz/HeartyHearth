@@ -11,9 +11,18 @@
             return dt;
         }
 
-        public static void Save(DataTable dt)
+        public static bool Save(DataTable dt)
         {
-            SQLUtility.SaveDataTable(dt, "CookbookRecipeUpdate");
+            try
+            {
+                SQLUtility.SaveDataTable(dt, "CookbookRecipeUpdate");
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
+
     }
 }

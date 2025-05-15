@@ -16,8 +16,8 @@
         private System.Windows.Forms.TextBox txtCalories;
         private System.Windows.Forms.TextBox txtRecipeStatus;
         private System.Windows.Forms.TextBox txtDrafted;
-        private System.Windows.Forms.Label lblPublished;
-        private System.Windows.Forms.Label lblArchived;
+        private System.Windows.Forms.TextBox txtPublished;
+        private System.Windows.Forms.TextBox txtArchived;
         private System.Windows.Forms.ComboBox lstCuisineName;
         private System.Windows.Forms.ComboBox lstUserName;
         private System.Windows.Forms.Button btnSave;
@@ -58,9 +58,9 @@
             lblDrafted = new Label();
             txtDrafted = new TextBox();
             lblCaptionPublished = new Label();
-            lblPublished = new Label();
+            txtPublished = new TextBox();
             lblCaptionArchived = new Label();
-            lblArchived = new Label();
+            txtArchived = new TextBox();
             lblUserName = new Label();
             lstUserName = new ComboBox();
             tbChildRecords = new TabControl();
@@ -84,7 +84,7 @@
             // 
             // tblHeader
             // 
-            tblHeader.AutoSize = true;
+            tblHeader.AutoSize = false;
             tblHeader.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             tblHeader.ColumnCount = 3;
             tblHeader.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 200F));
@@ -104,9 +104,9 @@
             tblHeader.Controls.Add(lblDrafted, 0, 5);
             tblHeader.Controls.Add(txtDrafted, 1, 5);
             tblHeader.Controls.Add(lblCaptionPublished, 0, 6);
-            tblHeader.Controls.Add(lblPublished, 1, 6);
+            tblHeader.Controls.Add(txtPublished, 1, 6);
             tblHeader.Controls.Add(lblCaptionArchived, 0, 7);
-            tblHeader.Controls.Add(lblArchived, 1, 7);
+            tblHeader.Controls.Add(txtArchived, 1, 7);
             tblHeader.Controls.Add(lblUserName, 0, 8);
             tblHeader.Controls.Add(lstUserName, 1, 8);
             tblHeader.Dock = DockStyle.Top;
@@ -120,8 +120,8 @@
             tblHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 12.5F));
             tblHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 12.5F));
             tblHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 12.5F));
-            tblHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 12.5F));
-            tblHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 12.5F));
+            tblHeader.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
+            tblHeader.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
             tblHeader.RowStyles.Add(new RowStyle(SizeType.Percent, 12.5F));
             tblHeader.Size = new Size(782, 364);
             tblHeader.TabIndex = 0;
@@ -196,6 +196,7 @@
             lstCuisineName.Location = new Point(203, 87);
             lstCuisineName.Name = "lstCuisineName";
             lstCuisineName.Size = new Size(500, 36);
+            lstCuisineName.BackColor = SystemColors.Window;
             lstCuisineName.TabIndex = 3;
             // 
             // lblCalories
@@ -249,6 +250,7 @@
             // 
             // txtDrafted
             // 
+            txtDrafted.ReadOnly = true;
             tblHeader.SetColumnSpan(txtDrafted, 2);
             txtDrafted.Dock = DockStyle.Left;
             txtDrafted.Location = new Point(203, 207);
@@ -266,16 +268,16 @@
             lblCaptionPublished.TabIndex = 10;
             lblCaptionPublished.Text = "Published";
             // 
-            // lblPublished
+            // txtPublished
             // 
-            lblPublished.BorderStyle = BorderStyle.FixedSingle;
-            tblHeader.SetColumnSpan(lblPublished, 2);
-            lblPublished.Dock = DockStyle.Left;
-            lblPublished.Location = new Point(203, 244);
-            lblPublished.Name = "lblPublished";
-            lblPublished.Size = new Size(500, 40);
-            lblPublished.TabIndex = 11;
-            lblPublished.TextAlign = ContentAlignment.MiddleLeft;
+            txtPublished.ReadOnly = true;
+            txtPublished.BorderStyle = BorderStyle.FixedSingle;
+            tblHeader.SetColumnSpan(txtPublished, 2);
+            txtPublished.Dock = DockStyle.Left;
+            txtPublished.Location = new Point(203, 244);
+            txtPublished.Name = "txtPublished";
+            txtPublished.TabIndex = 11;
+            txtPublished.Size = new Size(500, 34);
             // 
             // lblCaptionArchived
             // 
@@ -287,16 +289,16 @@
             lblCaptionArchived.TabIndex = 12;
             lblCaptionArchived.Text = "Archived";
             // 
-            // lblArchived
+            // txtArchived
             // 
-            lblArchived.BorderStyle = BorderStyle.FixedSingle;
-            tblHeader.SetColumnSpan(lblArchived, 2);
-            lblArchived.Dock = DockStyle.Left;
-            lblArchived.Location = new Point(203, 284);
-            lblArchived.Name = "lblArchived";
-            lblArchived.Size = new Size(500, 40);
-            lblArchived.TabIndex = 13;
-            lblArchived.TextAlign = ContentAlignment.MiddleLeft;
+            txtArchived.ReadOnly = true;
+            txtArchived.BorderStyle = BorderStyle.FixedSingle;
+            tblHeader.SetColumnSpan(txtArchived, 2);
+            txtArchived.Dock = DockStyle.Left;
+            txtArchived.Location = new Point(203, 284);
+            txtArchived.Name = "txtArchived";
+            txtArchived.TabIndex = 13;
+            txtArchived.Size = new Size(500, 34);
             // 
             // lblUserName
             // 

@@ -4,18 +4,14 @@
     {
         private DataTable dtrecipe, dtrecipeingredient, dtrecipesteps;
         private const string deleteColName = "deletecol";
-
-        private bool _isFreshClone = false;
+        private bool isFreshClone;
         public bool IsFreshClone
         {
-            get { return _isFreshClone; }
+            get => isFreshClone;
             set
             {
-                _isFreshClone = value;
-                if (btnDelete != null)
-                {
-                    btnDelete.Enabled = !_isFreshClone;
-                }
+                isFreshClone = value;
+                if (btnDelete != null) btnDelete.Enabled = !isFreshClone;
             }
         }
 
@@ -23,252 +19,177 @@
         {
             InitializeComponent();
             PrimaryKeyId = id;
-            this.Tag = PrimaryKeyId;
-            this.Text = "Recipe";
-
+            Tag = id;
+            Text = "Recipe";
             btnSave.Click += BtnSave_Click;
             btnDelete.Click += BtnDelete_Click;
             btnChangeStatus.Click += BtnChangeStatus_Click;
             btnSaveIngredients.Click += BtnSaveIngredients_Click;
             btnSaveSteps.Click += BtnSaveSteps_Click;
-            this.FormClosing += FrmRecipeInfo_FormClosing;
-            this.Shown += (s, e) =>
-            {
-                gIngredients.Columns["IngredientCombo"].DisplayIndex = 0;
-                gIngredients.Columns["MeasurementCombo"].DisplayIndex = 1;
-                gIngredients.Columns["Quantity"].DisplayIndex = 2;
-                gIngredients.Columns["Sequence"].DisplayIndex = 3;
-                gIngredients.Columns[deleteColName].DisplayIndex = 4;
-
-                // Re-check the fresh clone state.
-                if (IsFreshClone)
-                {
-                    btnDelete.Enabled = false;
-                }
-            };
-
+            FormClosing += FrmRecipeInfo_FormClosing;
+            Shown += (s, e) => { if (IsFreshClone) btnDelete.Enabled = false; };
             lstUserName.DropDownStyle = ComboBoxStyle.DropDownList;
             lstCuisineName.DropDownStyle = ComboBoxStyle.DropDownList;
             lstUserName.Visible = false;
             lblUserName.Visible = false;
-
             if (PrimaryKeyId == 0)
-            {
                 btnDelete.Enabled = btnChangeStatus.Enabled = btnSaveIngredients.Enabled = btnSaveSteps.Enabled = false;
-            }
-
-            LoadForm(PrimaryKeyId);
+            LoadForm(id);
             LoadRecipeIngredient();
             LoadRecipeSteps();
         }
 
-        public void LoadForm(int recipeidval)
+        public void LoadForm(int recipeid)
         {
-            PrimaryKeyId = recipeidval;
-            this.Tag = PrimaryKeyId;
+            PrimaryKeyId = recipeid;
+            Tag = recipeid;
             dtrecipe = recipe.Load(PrimaryKeyId);
             if (dtrecipe.Rows.Count == 0)
             {
-                DataRow newRow = dtrecipe.NewRow();
-                newRow["RecipeName"] = "";
-                newRow["RecipeStatus"] = "";
-                newRow["Calories"] = 0;
-                newRow["StaffMemberId"] = 0;
-                dtrecipe.Rows.Add(newRow);
+                var r = dtrecipe.NewRow();
+                r["RecipeName"] = "";
+                r["RecipeStatus"] = "";
+                r["Calories"] = 0;
+                r["StaffMemberId"] = 0;
+                dtrecipe.Rows.Add(r);
             }
             BindSource.DataSource = dtrecipe;
-
-            DataTable dtusers = recipe.GetUserList();
-            DataTable dtcuisine = recipe.GetCuisineList();
-
-            WindowsFormsUtility.SetListBinding(lstUserName, dtusers, dtrecipe, "StaffMember");
-            WindowsFormsUtility.SetListBinding(lstCuisineName, dtcuisine, dtrecipe, "Cuisine");
-
+            var du = recipe.GetUserList();
+            var dc = recipe.GetCuisineList();
+            WindowsFormsUtility.SetListBinding(lstUserName, du, dtrecipe, "StaffMember");
+            WindowsFormsUtility.SetListBinding(lstCuisineName, dc, dtrecipe, "Cuisine");
             WindowsFormsUtility.SetControlBinding(txtRecipeName, BindSource);
             WindowsFormsUtility.SetControlBinding(txtCalories, BindSource);
+            txtCalories.KeyPress += (s, e) =>
+            {
+                if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+                    e.Handled = true;
+            };
             WindowsFormsUtility.BindOutputDateControl(txtDrafted, BindSource, "Drafted");
-            WindowsFormsUtility.BindOutputDateControl(lblPublished, BindSource, "Published");
-            WindowsFormsUtility.BindOutputDateControl(lblArchived, BindSource, "Archived");
-            txtDrafted.ReadOnly = true;
+            WindowsFormsUtility.BindOutputDateControl(txtPublished, BindSource, "Published");
+            WindowsFormsUtility.BindOutputDateControl(txtArchived, BindSource, "Archived");
             WindowsFormsUtility.SetControlBinding(txtRecipeStatus, BindSource);
-
-            this.Text = "Recipe - " + GetRecipeDesc();
+            Text = "Recipe - " + GetRecipeDesc();
             SetButtonsEnablesBasedOnNewRecord();
         }
 
         private void LoadRecipeIngredient()
         {
             dtrecipeingredient = RecipeIngredient.LoadByRecipeId(PrimaryKeyId);
+            if (dtrecipeingredient.Columns.Contains("Quantity"))
+                dtrecipeingredient.Columns["Quantity"].ColumnName = "Amount";
+            if (dtrecipeingredient.Columns.Contains("Sequence"))
+                dtrecipeingredient.Columns["Sequence"].ColumnName = "IngredientSequence";
+            dtrecipeingredient.Columns["RecipeId"].DefaultValue = PrimaryKeyId;
+
             gIngredients.Columns.Clear();
             gIngredients.DataSource = dtrecipeingredient;
 
             WindowsFormsUtility.AddDeleteButtonToGrid(gIngredients, deleteColName);
-            WindowsFormsUtility.AddComboBoxToGrid(gIngredients, DataMaintenance.GetDataList("Ingredient"), "IngredientName", "Ingredient");
-            WindowsFormsUtility.AddComboBoxToGrid(gIngredients, DataMaintenance.GetDataList("Measurement"), "MeasurementType", "Measurement");
 
-            gIngredients.Columns["IngredientCombo"].HeaderText = "Ingredient";
+            WindowsFormsUtility.AddComboBoxToGrid(
+                gIngredients, DataMaintenance.GetDataList("Ingredient"),
+                "IngredientName", "Ingredient");
+            WindowsFormsUtility.AddComboBoxToGrid(
+                gIngredients, DataMaintenance.GetDataList("Measurement"),
+                "MeasurementType", "Measurement");
             gIngredients.Columns["IngredientCombo"].DefaultCellStyle.NullValue = "Add Ingredient here";
-            gIngredients.Columns["MeasurementCombo"].HeaderText = "Measurement";
             gIngredients.Columns["MeasurementCombo"].DefaultCellStyle.NullValue = "Add Measurement here";
 
             WindowsFormsUtility.FormatGridForEdit(gIngredients, "RecipeIngredient");
+            GridHelper.AttachNumericKeyPressHandler(gIngredients, "Amount", "IngredientSequence");
 
             gIngredients.Columns["IngredientCombo"].DisplayIndex = 0;
             gIngredients.Columns["MeasurementCombo"].DisplayIndex = 1;
-            gIngredients.Columns["Quantity"].DisplayIndex = 2;
-            gIngredients.Columns["Sequence"].DisplayIndex = 3;
+            gIngredients.Columns["Amount"].DisplayIndex = 2;
+            gIngredients.Columns["IngredientSequence"].DisplayIndex = 3;
             gIngredients.Columns[deleteColName].DisplayIndex = 4;
-            gIngredients.CellBeginEdit += gIngredients_CellBeginEdit;
 
-            GridHelper.AttachNumericKeyPressHandler(gIngredients, "Quantity", "Sequence");
+            if (gIngredients.Columns.Contains("IngredientSequence"))
+                gIngredients.Columns["IngredientSequence"].HeaderText = "Sequence";
+
+            gIngredients.RowsAdded += (s, e) => btnSaveIngredients.Enabled = true;
+            gIngredients.CellBeginEdit += gIngredients_CellBeginEdit;
             gIngredients.CellContentClick += gIngredients_CellContentClick;
         }
-
-        private void LoadRecipeSteps()
-        {
-            dtrecipesteps = RecipeStep.LoadByRecipeId(PrimaryKeyId);
-            gSteps.Columns.Clear();
-            gSteps.DataSource = dtrecipesteps;
-            WindowsFormsUtility.AddDeleteButtonToGrid(gSteps, deleteColName);
-            WindowsFormsUtility.FormatGridForEdit(gSteps, "RecipeStep");
-
-            gSteps.CellContentClick -= gSteps_CellContentClick;
-            gSteps.CellContentClick += gSteps_CellContentClick;
-        }
-
-        private void gIngredients_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
-        {
-            string colName = gIngredients.Columns[e.ColumnIndex].Name;
-            if (colName == "Quantity" || colName == "Sequence")
-            {
-                DataGridViewRow row = gIngredients.Rows[e.RowIndex];
-                bool ingredientMissing = row.Cells["IngredientCombo"].Value == null ||
-                                         string.IsNullOrWhiteSpace(row.Cells["IngredientCombo"].Value.ToString());
-                bool measurementMissing = row.Cells["MeasurementCombo"].Value == null ||
-                                          string.IsNullOrWhiteSpace(row.Cells["MeasurementCombo"].Value.ToString());
-                if (ingredientMissing || measurementMissing)
-                {
-                    MessageBox.Show("Please choose an ingredient and measurement first.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    e.Cancel = true;
-                }
-            }
-        }
-        private void gIngredients_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex < 0 || e.ColumnIndex < 0)
-                return;
-
-            if (gIngredients.Columns[e.ColumnIndex].Name == deleteColName)
-            {
-                DataGridViewRow row = gIngredients.Rows[e.RowIndex];
-                if (row.IsNewRow || row.Cells["IngredientCombo"].Value == null || row.Cells["MeasurementCombo"].Value == null)
-                {
-                    MessageBox.Show("Cannot delete placeholder row.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-                if (MessageBox.Show("Are you sure you want to delete this ingredient?", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                {
-                    dtrecipeingredient.Rows[e.RowIndex].Delete();
-                    btnSaveIngredients.Enabled = true;
-                }
-            }
-        }
-
-        private void gSteps_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex < 0 || e.ColumnIndex < 0)
-                return;
-
-            if (gSteps.Columns[e.ColumnIndex].Name == deleteColName)
-            {
-                DataGridViewRow row = gSteps.Rows[e.RowIndex];
-                if (row.IsNewRow)
-                {
-                    MessageBox.Show("Cannot delete placeholder row.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-                if (MessageBox.Show("Are you sure you want to delete this step?", "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                {
-                    dtrecipesteps.Rows[e.RowIndex].Delete();
-                    btnSaveSteps.Enabled = true;
-                }
-            }
-        }
-
-        private string GetRecipeDesc() =>
-            string.IsNullOrWhiteSpace(dtrecipe.Rows[0]["RecipeName"].ToString()) ? "New Recipe" : dtrecipe.Rows[0]["RecipeName"].ToString();
-
-        private void SetButtonsEnablesBasedOnNewRecord()
-        {
-            bool isNew = PrimaryKeyId == 0;
-            btnDelete.Enabled = btnChangeStatus.Enabled = btnSaveIngredients.Enabled = btnSaveSteps.Enabled = !isNew;
-        }
-
-        private void Save()
-        {
-            try
-            {
-                if (PrimaryKeyId == 0 && Convert.ToInt32(dtrecipe.Rows[0]["StaffMemberId"]) == 0)
-                {
-                    DataTable dtusers = recipe.GetUserList();
-                    if (dtusers.Rows.Count > 0)
-                        dtrecipe.Rows[0]["StaffMemberId"] = dtusers.Rows[0]["StaffMemberId"];
-                }
-                recipe.Save(dtrecipe);
-                if (PrimaryKeyId == 0 && dtrecipe.Rows[0]["RecipeId"] != DBNull.Value)
-                {
-                    PrimaryKeyId = Convert.ToInt32(dtrecipe.Rows[0]["RecipeId"]);
-                    this.Tag = PrimaryKeyId;
-                }
-                DataRow updatedRow = recipe.Load(PrimaryKeyId).Rows[0];
-                dtrecipe.Rows[0]["RecipeStatus"] = updatedRow["RecipeStatus"];
-                dtrecipe.Rows[0]["Drafted"] = updatedRow["Drafted"];
-                dtrecipe.Rows[0]["Published"] = updatedRow["Published"];
-                dtrecipe.Rows[0]["Archived"] = updatedRow["Archived"];
-
-                BindSource.ResetBindings(false);
-                this.Text = "Recipe - " + GetRecipeDesc();
-                MessageBox.Show("Saved!", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                dtrecipe.AcceptChanges();
-                dtrecipeingredient.AcceptChanges();
-                dtrecipesteps.AcceptChanges();
-                SetButtonsEnablesBasedOnNewRecord();
-                if (IsFreshClone)
-                {
-                    IsFreshClone = false;
-                    btnDelete.Enabled = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, Application.ProductName);
-            }
-        }
-        private void BtnSave_Click(object sender, EventArgs e)
-        {
-            Save();
-        }
-
-        private void BtnDelete_Click(object sender, EventArgs e)
-        {
-            if (MessageBox.Show("Are you sure you want to delete this recipe?", Application.ProductName, MessageBoxButtons.YesNo) == DialogResult.Yes)
-                try { recipe.Delete(dtrecipe); this.Close(); }
-                catch (Exception ex) { MessageBox.Show(ex.Message, Application.ProductName); }
-        }
-
-        private void BtnChangeStatus_Click(object sender, EventArgs e) =>
-            ((frmMain)this.MdiParent).OpenForm(typeof(frmChangeStatus), PrimaryKeyId);
 
         private void BtnSaveIngredients_Click(object sender, EventArgs e)
         {
             try
             {
+                foreach (DataRow r in dtrecipeingredient.Rows)
+                    if (r.RowState == DataRowState.Added)
+                        r["RecipeId"] = PrimaryKeyId;
                 RecipeIngredient.Save(dtrecipeingredient);
-                MessageBox.Show("Ingredients saved!", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                btnSaveIngredients.Enabled = false;
+                foreach (DataRow dr in dtrecipeingredient.Select(
+                    null, null, DataViewRowState.Deleted))
+                {
+                    var id = (int)dr["RecipeIngredientId", DataRowVersion.Original];
+                    using var cmd = SQLUtility.GetSqlCommand("RecipeIngredientDelete");
+                    SQLUtility.SetParamValue(cmd, "@RecipeIngredientId", id);
+                    SQLUtility.ExecuteSQL(cmd);
+                }
+                MessageBox.Show("Ingredients saved!", "Save",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
                 dtrecipeingredient.AcceptChanges();
+                btnSaveIngredients.Enabled = true;
             }
-            catch (Exception ex) { MessageBox.Show("Error saving ingredients: " + ex.Message, Application.ProductName); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error saving ingredients: " + ex.Message,
+                    Application.ProductName);
+            }
+        }
+
+        private void gIngredients_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0
+             || gIngredients.Columns[e.ColumnIndex].Name != deleteColName)
+                return;
+
+            var row = gIngredients.Rows[e.RowIndex];
+            if (row.IsNewRow
+             || row.Cells["RecipeIngredientId"].Value == DBNull.Value)
+                return;
+
+            if (MessageBox.Show(
+                    "Are you sure you want to delete this ingredient?",
+                    "Confirm Delete",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question)
+                != DialogResult.Yes)
+                return;
+
+            int id = (int)row.Cells["RecipeIngredientId"].Value;
+            using var cmd = SQLUtility.GetSqlCommand("RecipeIngredientDelete");
+            SQLUtility.SetParamValue(cmd, "@RecipeIngredientId", id);
+            SQLUtility.ExecuteSQL(cmd);
+
+            LoadRecipeIngredient();
+        }
+
+        private void LoadRecipeSteps()
+        {
+            dtrecipesteps = RecipeStep.LoadByRecipeId(PrimaryKeyId);
+            if (dtrecipesteps.Columns.Contains("Sequence"))
+                dtrecipesteps.Columns["Sequence"].ColumnName = "DirectionSequence";
+            dtrecipesteps.Columns["RecipeId"].DefaultValue = PrimaryKeyId;
+
+            gSteps.Columns.Clear();
+            gSteps.DataSource = dtrecipesteps;
+
+            WindowsFormsUtility.AddDeleteButtonToGrid(gSteps, deleteColName);
+            WindowsFormsUtility.FormatGridForEdit(gSteps, "RecipeStep");
+            GridHelper.AttachNumericKeyPressHandler(gSteps, "DirectionSequence");
+
+            if (gSteps.Columns.Contains("DirectionSequence"))
+                gSteps.Columns["DirectionSequence"].HeaderText = "Sequence";
+
+            gSteps.EditMode = DataGridViewEditMode.EditOnEnter;
+            gSteps.AllowUserToAddRows = true;
+
+            gSteps.RowsAdded += (s, e) => btnSaveSteps.Enabled = true;
+            gSteps.CellContentClick += gSteps_CellContentClick;
         }
 
         private void BtnSaveSteps_Click(object sender, EventArgs e)
@@ -276,11 +197,80 @@
             try
             {
                 RecipeStep.Save(dtrecipesteps);
-                MessageBox.Show("Steps saved!", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                btnSaveSteps.Enabled = false;
+                foreach (DataRow dr in dtrecipesteps.Select(
+                    null, null, DataViewRowState.Deleted))
+                {
+                    var id = (int)dr["RecipeDirectionId", DataRowVersion.Original];
+                    using var cmd = SQLUtility.GetSqlCommand("RecipeDirectionDelete");
+                    SQLUtility.SetParamValue(cmd, "@RecipeDirectionId", id);
+                    SQLUtility.ExecuteSQL(cmd);
+                }
+                MessageBox.Show("Steps saved!", "Save",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
                 dtrecipesteps.AcceptChanges();
+                btnSaveSteps.Enabled = true;
             }
-            catch (Exception ex) { MessageBox.Show("Error saving steps: " + ex.Message, Application.ProductName); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error saving steps: " + ex.Message,
+                    Application.ProductName);
+            }
+        }
+
+        private void gSteps_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0
+             || gSteps.Columns[e.ColumnIndex].Name != deleteColName)
+                return;
+
+            var row = gSteps.Rows[e.RowIndex];
+            if (row.IsNewRow
+             || row.Cells["RecipeDirectionId"].Value == DBNull.Value)
+                return;
+
+            if (MessageBox.Show(
+                    "Are you sure you want to delete this step?",
+                    "Confirm Delete",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question)
+                != DialogResult.Yes)
+                return;
+
+            int id = (int)row.Cells["RecipeDirectionId"].Value;
+            using var cmd = SQLUtility.GetSqlCommand("RecipeDirectionDelete");
+            SQLUtility.SetParamValue(cmd, "@RecipeDirectionId", id);
+            SQLUtility.ExecuteSQL(cmd);
+
+            LoadRecipeSteps();
+        }
+
+        private void gIngredients_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            var col = gIngredients.Columns[e.ColumnIndex].Name;
+            if (col != "Amount" && col != "IngredientSequence") return;
+            var row = gIngredients.Rows[e.RowIndex];
+            var miss = row.Cells["IngredientCombo"].Value == null ||
+                       row.Cells["MeasurementCombo"].Value == null;
+            if (miss)
+            {
+                MessageBox.Show("Please choose an ingredient and measurement first.",
+                    "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                e.Cancel = true;
+            }
+        }
+
+        private string GetRecipeDesc() =>
+            string.IsNullOrWhiteSpace(dtrecipe.Rows[0]["RecipeName"].ToString())
+                ? "New Recipe"
+                : dtrecipe.Rows[0]["RecipeName"].ToString();
+
+        private void SetButtonsEnablesBasedOnNewRecord()
+        {
+            var isNew = PrimaryKeyId == 0;
+            btnDelete.Enabled =
+            btnChangeStatus.Enabled =
+            btnSaveIngredients.Enabled =
+            btnSaveSteps.Enabled = !isNew;
         }
 
         protected override void PreClose()
@@ -290,35 +280,28 @@
             base.PreClose();
         }
 
-        protected override DataTable[] GetDataTablesForChangeCheck()
-        {
-            return new DataTable[] { dtrecipe, dtrecipeingredient, dtrecipesteps };
-        }
+        protected override DataTable[] GetDataTablesForChangeCheck() =>
+            new[] { dtrecipe, dtrecipeingredient, dtrecipesteps };
 
         protected override bool SaveData()
         {
             try
             {
-                if (PrimaryKeyId == 0 && Convert.ToInt32(dtrecipe.Rows[0]["StaffMemberId"]) == 0)
+                if (PrimaryKeyId == 0 &&
+                    Convert.ToInt32(dtrecipe.Rows[0]["StaffMemberId"]) == 0)
                 {
-                    DataTable dtusers = recipe.GetUserList();
-                    if (dtusers.Rows.Count > 0)
-                        dtrecipe.Rows[0]["StaffMemberId"] = dtusers.Rows[0]["StaffMemberId"];
+                    var du = recipe.GetUserList();
+                    if (du.Rows.Count > 0)
+                        dtrecipe.Rows[0]["StaffMemberId"] = du.Rows[0]["StaffMemberId"];
                 }
                 recipe.Save(dtrecipe);
-                if (PrimaryKeyId == 0 && dtrecipe.Rows[0]["RecipeId"] != DBNull.Value)
-                {
-                    PrimaryKeyId = Convert.ToInt32(dtrecipe.Rows[0]["RecipeId"]);
-                    this.Tag = PrimaryKeyId;
-                }
-                DataRow updatedRow = recipe.Load(PrimaryKeyId).Rows[0];
-                dtrecipe.Rows[0]["RecipeStatus"] = updatedRow["RecipeStatus"];
-                dtrecipe.Rows[0]["Drafted"] = updatedRow["Drafted"];
-                dtrecipe.Rows[0]["Published"] = updatedRow["Published"];
-                dtrecipe.Rows[0]["Archived"] = updatedRow["Archived"];
-
+                var up = recipe.Load(PrimaryKeyId).Rows[0];
+                dtrecipe.Rows[0]["RecipeStatus"] = up["RecipeStatus"];
+                dtrecipe.Rows[0]["Drafted"] = up["Drafted"];
+                dtrecipe.Rows[0]["Published"] = up["Published"];
+                dtrecipe.Rows[0]["Archived"] = up["Archived"];
                 BindSource.ResetBindings(false);
-                this.Text = "Recipe - " + GetRecipeDesc();
+                Text = "Recipe - " + GetRecipeDesc();
                 MessageBox.Show("Saved!", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 dtrecipe.AcceptChanges();
                 dtrecipeingredient.AcceptChanges();
@@ -333,45 +316,39 @@
             }
         }
 
-        private bool HasUnsavedChanges()
+        private void BtnSave_Click(object sender, EventArgs e) => SaveData();
+
+        private void BtnDelete_Click(object sender, EventArgs e)
         {
-            return (dtrecipe.GetChanges() != null ||
-                    dtrecipeingredient.GetChanges() != null ||
-                    dtrecipesteps.GetChanges() != null);
+            if (MessageBox.Show("Are you sure you want to delete this recipe?",
+                    Application.ProductName, MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                recipe.Delete(dtrecipe);
+                ((frmMain)MdiParent).OpenForm(typeof(frmRecipeList), 0);
+                Close();
+            }
         }
+
+        private void BtnChangeStatus_Click(object sender, EventArgs e) =>
+            ((frmMain)MdiParent).OpenForm(typeof(frmChangeStatus), PrimaryKeyId);
 
         private void FrmRecipeInfo_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (IsFreshClone)
-            {
-                bool changesExist = HasUnsavedChanges();
-                string prompt = changesExist ?
-                    "Do you want to save the changes to " + GetRecipeDesc() + "?" :
-                    "Do you want to save " + GetRecipeDesc() + "?";
-                DialogResult result = MessageBox.Show(prompt, "Confirm Save", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-                if (result == DialogResult.Yes)
-                {
-                    if (!SaveData())
-                    {
-                        e.Cancel = true;
-                    }
-                }
-                else if (result == DialogResult.No)
-                {
-                    try
-                    {
-                        recipe.Delete(dtrecipe);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Error discarding the cloned recipe: " + ex.Message, Application.ProductName);
-                    }
-                }
-                else
-                {
-                    e.Cancel = true;
-                }
-            }
+            if (!IsFreshClone) return;
+            var changed = dtrecipe.GetChanges() != null
+                       || dtrecipeingredient.GetChanges() != null
+                       || dtrecipesteps.GetChanges() != null;
+            var prompt = changed
+                ? $"Do you want to save the changes to {GetRecipeDesc()}?"
+                : $"Do you want to save {GetRecipeDesc()}?";
+            var res = MessageBox.Show(prompt, "Confirm Save",
+                MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            if (res == DialogResult.Yes)
+                e.Cancel = !SaveData();
+            else if (res == DialogResult.No)
+                recipe.Delete(dtrecipe);
+            else
+                e.Cancel = true;
         }
     }
 }

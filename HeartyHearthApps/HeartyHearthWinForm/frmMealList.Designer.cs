@@ -33,6 +33,8 @@
             tblMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gMealList).BeginInit();
             SuspendLayout();
+            gMealList.AllowUserToAddRows = false;
+            gMealList.ReadOnly = true;
             // 
             // tblMain
             // 

@@ -34,6 +34,8 @@
             tblMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)gCookbookList).BeginInit();
             SuspendLayout();
+            gCookbookList.AllowUserToAddRows = false;
+            gCookbookList.ReadOnly = true;
             // 
             // tblMain
             // 

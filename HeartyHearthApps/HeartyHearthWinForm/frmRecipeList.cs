@@ -18,7 +18,8 @@
                 { "RecipeName", "Recipe Name" },
                 { "RecipeStatus", "Status" },
                 { "UserName", "User" },
-                { "Calories", "Calories" }
+                { "Calories", "Calories" },
+                { "NumIngredients","Num Ingredients" }
             });
         }
 
