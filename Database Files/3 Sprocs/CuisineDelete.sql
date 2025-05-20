@@ -7,7 +7,7 @@ begin
         select @Message = 'Cannot delete cuisine because it is assigned to one or more recipes.', @Return = 1;
         return @Return;
     end
-
+--AS missing delete of all it's related records.
     delete from Cuisine where CuisineId = @CuisineId;
     return 0;
 end 

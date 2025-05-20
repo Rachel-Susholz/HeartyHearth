@@ -1,3 +1,4 @@
+--AS This sproc should not be needed. Use regular get sproc.
 create or alter procedure dbo.RecipeNameAndIdGet(@RecipeId int = 0, @All bit = 0, @RecipeName varchar(150) = '')
 as 
 begin 

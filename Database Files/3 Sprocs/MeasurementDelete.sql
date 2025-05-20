@@ -7,7 +7,7 @@ begin
         select @Message = 'Cannot delete measurement because it is used in one or more recipes.', @Return = 1;
         return @Return;
     end
-
+--AS missing delete of related records.
     delete from Measurement where MeasurementId = @MeasurementId;
     return 0;
 end 

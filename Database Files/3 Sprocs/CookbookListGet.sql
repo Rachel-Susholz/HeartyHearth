@@ -6,6 +6,7 @@ begin
          c.CookbookName,
          sm.Username as Author,
          count(r.recipeid) as NumRecipes,
+--AS Why are you always setting the price to recipes * 1.25?
          count(r.recipeid) * 1.25 as Price
     from Cookbook c
     left join CookbookRecipe cr 

@@ -5,6 +5,7 @@ begin
          m.mealid,
          m.mealname,
          sm.username as [user],
+--AS It would be nicer code to just have a regular select statement and use distict's to get the correct sum's.
          isnull((
              select sum(r.calories)
              from courserecipe cr
