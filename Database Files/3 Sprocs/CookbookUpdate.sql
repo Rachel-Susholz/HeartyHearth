@@ -13,7 +13,7 @@ begin
     declare @return int = 0;
     
     select @CookbookId = isnull(@CookbookId, 0);
-        
+--AS You are missing columns from the insert and update that's why it isn't working to change them in the front end.  
     if @CookbookId = 0 
     begin 
         insert into Cookbook (CookbookName, Price, CookbookStatus, Created, StaffMemberId)

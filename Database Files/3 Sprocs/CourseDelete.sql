@@ -7,7 +7,7 @@ begin
         select @Message = 'Cannot delete course because it is assigned to one or more meals.', @Return = 1;
         return @Return;
     end
-
+--AS Missing delete of all it's related records.
     delete from Course where CourseTypeId = @CourseTypeId;
     return 0;
 end 

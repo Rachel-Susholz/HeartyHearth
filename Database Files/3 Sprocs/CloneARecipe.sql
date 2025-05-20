@@ -16,7 +16,7 @@ begin
         select @OriginalRecipeName = RecipeName
         from  Recipe
         where RecipeId = @BaseRecipeId;
-        
+--AS This case won't happen since recipename cannot be null        
         if (@OriginalRecipeName is null)
         begin
             set @Message = 'Original recipe not found.';
