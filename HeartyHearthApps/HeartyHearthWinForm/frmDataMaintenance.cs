@@ -32,15 +32,13 @@ namespace HeartyHearthWinForm
             dtlist.AcceptChanges();
 
             bsData.DataSource = dtlist;
-            bsData.ListChanged += BsData_ListChanged;
-
             gData.DataSource = bsData;
 
             if (gData.Columns.Contains(deleteColumnName))
                 gData.Columns.Remove(deleteColumnName);
             WindowsFormsUtility.AddDeleteButtonToGrid(gData, deleteColumnName);
             WindowsFormsUtility.FormatGridForEdit(gData, tableType.ToString());
-
+            GridHelper.AttachNumericKeyPressHandler(gData, "CourseSequence");
             gData.EditingControlShowing += gData_EditingControlShowing;
 
             btnSave.Enabled = false;

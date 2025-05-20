@@ -104,7 +104,6 @@
             gIngredients.Columns[deleteColName].DisplayIndex = 4;
 
             gIngredients.RowsAdded += (s, e) => btnSaveIngredients.Enabled = true;
-            gIngredients.CellBeginEdit += gIngredients_CellBeginEdit;
             gIngredients.CellContentClick += gIngredients_CellContentClick;
         }
 
@@ -182,11 +181,17 @@
                 gSteps.Columns["DirectionSequence"].HeaderText = "Sequence";
 
             gSteps.EditMode = DataGridViewEditMode.EditOnEnter;
-            gSteps.AllowUserToAddRows = true;
+            gSteps.AllowUserToAddRows = true; 
+        }
 
-            gSteps.RowsAdded += (s, e) => btnSaveSteps.Enabled = true;
-            gIngredients.CellBeginEdit += gSteps_CellBeginEdit;
-            gSteps.CellContentClick += gSteps_CellContentClick;
+        private void GSteps_DefaultValuesNeeded(object sender, DataGridViewRowEventArgs e)
+        {
+            if (!e.Row.IsNewRow) return;
+            foreach (DataGridViewCell cell in e.Row.Cells)
+            {
+                cell.ReadOnly = false;
+                cell.Style.BackColor = SystemColors.Window;
+            }
         }
 
         private void BtnSaveSteps_Click(object sender, EventArgs e)
@@ -242,34 +247,6 @@
             MessageBox.Show("Step deleted!", "Delete", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             LoadRecipeSteps();
-        }
-
-        private void gIngredients_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
-        {
-            var col = gIngredients.Columns[e.ColumnIndex].Name;
-            if (col != "Amount" && col != "IngredientSequence") return;
-            var row = gIngredients.Rows[e.RowIndex];
-            var miss = row.Cells["IngredientCombo"].Value == null ||
-                       row.Cells["MeasurementCombo"].Value == null;
-            if (miss)
-            {
-                MessageBox.Show("Please choose an ingredient and measurement first.",
-                    "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                e.Cancel = true;
-            }
-        }
-
-        private void gSteps_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
-        {
-            var col = gSteps.Columns[e.ColumnIndex].Name;
-            var row = gSteps.Rows[e.RowIndex];
-            var miss = row.Cells["RecipeDirection"].Value == null;
-            if (miss)
-            {
-                MessageBox.Show("Please fill in direction first.",
-                    "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                e.Cancel = true;
-            }
         }
 
         private string GetRecipeDesc() =>

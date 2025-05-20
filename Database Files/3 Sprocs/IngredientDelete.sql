@@ -1,14 +1,33 @@
-create or alter procedure dbo.IngredientDelete(@IngredientId int, @Message varchar(500) = '' output)
+create or alter procedure dbo.IngredientDelete(
+    @IngredientId int,
+    @Message varchar(500) = '' output
+)
 as 
 begin 
-    declare @Return int = 0;
-    if exists (select 1 from RecipeIngredient where IngredientId = @IngredientId)
+    set nocount on
+    declare @Return int = 0
+
+    if not exists (select 1 from Ingredient where IngredientId = @IngredientId)
     begin
-        select @Message = 'Cannot delete ingredient because it is used in one or more recipes.', @Return = 1;
-        return @Return;
+        select @Return = 1, @Message = 'Ingredient does not exist.'
+        return @Return
     end
---AS missing delete of all it's related records.
-    delete from Ingredient where IngredientId = @IngredientId;
-    return 0;
+
+    begin try 
+        begin tran
+
+        delete from RecipeIngredient
+            where IngredientId = @IngredientId
+        delete from Ingredient
+            where IngredientId = @IngredientId
+
+        commit tran
+    end try 
+    begin catch 
+        rollback
+        select @Return = 1, @Message = 'Error deleting ingredient. Please try again.' + error_Message()
+    end catch
+
+    return @Return
 end 
 go

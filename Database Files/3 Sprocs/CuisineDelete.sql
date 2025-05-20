@@ -1,14 +1,42 @@
-create or alter procedure dbo.CuisineDelete(@CuisineId int, @Message varchar(500) = '' output)
+create or alter procedure dbo.CuisineDelete(
+    @CuisineId int,
+    @Message varchar(500) = '' output
+)
 as 
-begin
-    declare @Return int = 0; 
-    if exists (select 1 from Recipe where CuisineId = @CuisineId)
+begin 
+    set nocount on
+    declare @Return int = 0
+
+    if not exists (select 1 from Cuisine where CuisineId = @CuisineId)
     begin
-        select @Message = 'Cannot delete cuisine because it is assigned to one or more recipes.', @Return = 1;
-        return @Return;
+        select @Return = 1, @Message = 'Cuisine does not exist.'
+        return @Return
     end
---AS missing delete of all it's related records.
-    delete from Cuisine where CuisineId = @CuisineId;
-    return 0;
+
+    begin try 
+        begin tran
+
+        delete from RecipeDirection
+            where RecipeId in (select RecipeId from Recipe where CuisineId = @CuisineId)
+        delete from RecipeIngredient
+            where RecipeId in (select RecipeId from Recipe where CuisineId = @CuisineId)
+        delete from CourseRecipe
+            where RecipeId in (select RecipeId from Recipe where CuisineId = @CuisineId)
+        delete from CookbookRecipe
+            where RecipeId in (select RecipeId from Recipe where CuisineId = @CuisineId)
+        delete from Recipe
+            where CuisineId = @CuisineId
+        delete from Cuisine
+            where CuisineId = @CuisineId
+
+        commit tran
+    end try 
+    begin catch 
+        rollback
+        select @Return = 1, 
+               @Message = 'Error deleting cuisine. Please try again.' + error_Message()
+    end catch
+
+    return @Return
 end 
 go
