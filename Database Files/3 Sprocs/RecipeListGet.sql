@@ -6,10 +6,14 @@ begin
         r.RecipeName,
         r.RecipeStatus,
         sm.UserName,
-        r.Calories
+        r.Calories,
+        count(i.IngredientId) as NumIngredients
     from Recipe r
+    left join dbo.RecipeIngredient ri on ri.RecipeId = r.RecipeId
+    left join dbo.Ingredient i on i.IngredientId = ri.IngredientId 
     join StaffMember sm
     on sm.StaffMemberId = r.StaffMemberId
+    group by r.RecipeId, r.RecipeName, r.RecipeStatus, sm.UserName, r.Calories
     order by 
   case 
     when RecipeStatus = 'published' then 1

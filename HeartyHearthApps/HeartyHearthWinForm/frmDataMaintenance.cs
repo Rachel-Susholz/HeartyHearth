@@ -21,6 +21,8 @@ namespace HeartyHearthWinForm
             gData.CellContentClick += GData_CellContentClick;
             SetUpRadioButtons();
             BindData(currenttabletype);
+
+            gData.CellBeginEdit += (s, e) => btnSave.Enabled = true;
         }
 
         private void BindData(TableTypeEnum tableType)
@@ -30,7 +32,6 @@ namespace HeartyHearthWinForm
             dtlist.AcceptChanges();
 
             bsData.DataSource = dtlist;
-            bsData.ListChanged -= BsData_ListChanged;
             bsData.ListChanged += BsData_ListChanged;
 
             gData.DataSource = bsData;

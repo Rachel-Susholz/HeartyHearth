@@ -30,8 +30,6 @@
             Shown += (s, e) => { if (IsFreshClone) btnDelete.Enabled = false; };
             lstUserName.DropDownStyle = ComboBoxStyle.DropDownList;
             lstCuisineName.DropDownStyle = ComboBoxStyle.DropDownList;
-            lstUserName.Visible = false;
-            lblUserName.Visible = false;
             if (PrimaryKeyId == 0)
                 btnDelete.Enabled = btnChangeStatus.Enabled = btnSaveIngredients.Enabled = btnSaveSteps.Enabled = false;
             LoadForm(id);
@@ -105,9 +103,6 @@
             gIngredients.Columns["IngredientSequence"].DisplayIndex = 3;
             gIngredients.Columns[deleteColName].DisplayIndex = 4;
 
-            if (gIngredients.Columns.Contains("IngredientSequence"))
-                gIngredients.Columns["IngredientSequence"].HeaderText = "Sequence";
-
             gIngredients.RowsAdded += (s, e) => btnSaveIngredients.Enabled = true;
             gIngredients.CellBeginEdit += gIngredients_CellBeginEdit;
             gIngredients.CellContentClick += gIngredients_CellContentClick;
@@ -164,6 +159,7 @@
             using var cmd = SQLUtility.GetSqlCommand("RecipeIngredientDelete");
             SQLUtility.SetParamValue(cmd, "@RecipeIngredientId", id);
             SQLUtility.ExecuteSQL(cmd);
+            MessageBox.Show("Ingredient deleted!", "Delete", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             LoadRecipeIngredient();
         }
@@ -189,6 +185,7 @@
             gSteps.AllowUserToAddRows = true;
 
             gSteps.RowsAdded += (s, e) => btnSaveSteps.Enabled = true;
+            gIngredients.CellBeginEdit += gSteps_CellBeginEdit;
             gSteps.CellContentClick += gSteps_CellContentClick;
         }
 
@@ -207,8 +204,10 @@
                 }
                 MessageBox.Show("Steps saved!", "Save",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
-                dtrecipesteps.AcceptChanges();
-                btnSaveSteps.Enabled = true;
+                LoadRecipeSteps();
+
+                // and disable the save button until a new edit happens
+                btnSaveSteps.Enabled = false;
             }
             catch (Exception ex)
             {
@@ -240,6 +239,7 @@
             using var cmd = SQLUtility.GetSqlCommand("RecipeDirectionDelete");
             SQLUtility.SetParamValue(cmd, "@RecipeDirectionId", id);
             SQLUtility.ExecuteSQL(cmd);
+            MessageBox.Show("Step deleted!", "Delete", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             LoadRecipeSteps();
         }
@@ -254,6 +254,19 @@
             if (miss)
             {
                 MessageBox.Show("Please choose an ingredient and measurement first.",
+                    "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                e.Cancel = true;
+            }
+        }
+
+        private void gSteps_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            var col = gSteps.Columns[e.ColumnIndex].Name;
+            var row = gSteps.Rows[e.RowIndex];
+            var miss = row.Cells["RecipeDirection"].Value == null;
+            if (miss)
+            {
+                MessageBox.Show("Please fill in direction first.",
                     "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 e.Cancel = true;
             }
@@ -320,12 +333,39 @@
 
         private void BtnDelete_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Are you sure you want to delete this recipe?",
-                    Application.ProductName, MessageBoxButtons.YesNo) == DialogResult.Yes)
+            var result = MessageBox.Show(
+                "Are you sure you want to delete this recipe?",
+                "Confirm Delete",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question    // ← question icon
+            );
+            if (result != DialogResult.Yes)
+                return;
+
+            try
             {
-                recipe.Delete(dtrecipe);
+                using var cmd = SQLUtility.GetSqlCommand("RecipeDelete");
+                SQLUtility.SetParamValue(cmd, "@RecipeId", PrimaryKeyId);
+                SQLUtility.ExecuteSQL(cmd);
+
+                MessageBox.Show(
+                    "Recipe deleted.",
+                    "Deleted",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+
                 ((frmMain)MdiParent).OpenForm(typeof(frmRecipeList), 0);
                 Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    ex.Message,          
+                    "Delete Not Allowed", 
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
             }
         }
 

@@ -69,7 +69,7 @@
                     MessageBoxIcon.Information
                 );
                 RecipeEvents.RaiseRecipeStatusChanged();
-                Close();
+                LoadRecipeData();
             }
             catch (Exception ex)
             {
