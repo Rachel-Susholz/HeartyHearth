@@ -11,7 +11,6 @@ begin
 end
 go 
 
-
 exec RecipeGet
 
 exec RecipeGet @All = 1
