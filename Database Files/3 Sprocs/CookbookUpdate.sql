@@ -1,36 +1,42 @@
-create or alter procedure dbo.CookbookUpdate(
-    @CookbookId int output,
-    @CookbookName varchar(150),
-    @Price decimal(10,2),
-    @CookbookStatus bit,
-    @Created datetime = null, 
-    @StaffMemberId int, 
-    @message varchar(500) = '' output 
+create or alter procedure dbo.CookbookUpdate
+(
+    @CookbookId      int output,
+    @CookbookName    varchar(150),
+    @Price           decimal(10,2),
+    @CookbookStatus  bit,
+    @Created         datetime = null,
+    @StaffMemberId   int
 )
-as 
-begin 
+as
+begin
     set nocount on;
-    declare @return int = 0;
-    
     select @CookbookId = isnull(@CookbookId, 0);
---AS You are missing columns from the insert and update that's why it isn't working to change them in the front end.  
-    if @CookbookId = 0 
-    begin 
-        insert into Cookbook (CookbookName, Price, CookbookStatus, Created, StaffMemberId)
-        values (@CookbookName, @Price, 0, getdate(), @StaffMemberId);  
+
+    if @CookbookId = 0
+    begin
+        insert into Cookbook
+            (CookbookName, Price, CookbookStatus, Created, StaffMemberId)
+        values
+            (
+              @CookbookName,
+              @Price,
+              @CookbookStatus,
+              getdate(),
+              @StaffMemberId
+            );
         select @CookbookId = scope_identity();
-    end 
+    end
     else
-    begin 
-        update Cookbook 
-        set 
-            CookbookName = @CookbookName, 
-            Price = @Price, 
-            CookbookStatus = @CookbookStatus, 
-            StaffMemberId = @StaffMemberId
+    begin
+        update Cookbook
+        set
+            CookbookName   = @CookbookName,
+            Price          = @Price,
+            CookbookStatus = @CookbookStatus,
+            StaffMemberId  = @StaffMemberId
         where CookbookId = @CookbookId;
     end
 
-    return @return;
+    return 0;
 end
 go
