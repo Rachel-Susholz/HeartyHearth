@@ -13,15 +13,10 @@
 
         public static bool Save(DataTable dt)
         {
-            try
-            {
+            
                 SQLUtility.SaveDataTable(dt, "CookbookRecipeUpdate");
                 return true;
-            }
-            catch
-            {
-                return false;
-            }
+          
         }
 
     }

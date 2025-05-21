@@ -1,35 +1,32 @@
-create or alter proc dbo.CookbookRecipeUpdate(
-    @CookbookRecipeId int output,
-    @CookbookId int,
-    @RecipeId int,  
-    @Sequence int,
-    @Message varchar(500) = '' output 
+create or alter procedure dbo.CookbookRecipeUpdate
+(
+    @CookbookRecipeId int     output,
+    @CookbookId       int,
+    @RecipeId         int,
+    @Sequence         int
 )
-as 
-begin 
-declare @return int = 0
+as
+begin
+    set nocount on;
 
-select @CookbookRecipeId = isnull(@CookbookRecipeId, 0)
+    select @CookbookRecipeId = isnull(@CookbookRecipeId, 0);
 
-if @CookbookRecipeId = 0
-begin 
-    insert CookbookRecipe(CookbookRecipeId, CookbookId, RecipeId, RecipeSequence)
-    values(@CookbookRecipeId, @CookbookId, @RecipeId, @Sequence)
+    if @CookbookRecipeId = 0
+    begin
+        insert into CookbookRecipe
+            (CookbookId, RecipeId, RecipeSequence)
+        values
+            (@CookbookId, @RecipeId, @Sequence);
 
-    select @CookbookRecipeId = scope_identity()
-end 
-else 
-begin 
-    update CookbookRecipe 
-    set 
-    CookbookId = @CookbookId,
-    RecipeId = @RecipeId,
-    RecipeSequence = @Sequence
-    where CookbookRecipeId = @CookbookRecipeId
-end 
-return @return 
-end 
-go 
-
-
-
+        select @CookbookRecipeId = scope_identity();
+    end
+    else
+    begin
+        update CookbookRecipe
+        set
+            RecipeId       = @RecipeId,
+            RecipeSequence = @Sequence
+        where CookbookRecipeId = @CookbookRecipeId;
+    end
+end
+go

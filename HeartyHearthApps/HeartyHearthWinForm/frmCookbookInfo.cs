@@ -15,9 +15,9 @@
                 : "Cookbook -";
 
             Load += OnLoad;
-            btnSave.Click += BtnSave_Click;
+            btnSave.Click += SaveAll_Click;
+            btnSaveRecipe.Click += SaveAll_Click;
             btnDelete.Click += BtnDelete_Click;
-            btnSaveRecipe.Click += BtnSaveRecipe_Click;
 
             lstUserName.DropDownStyle = ComboBoxStyle.DropDownList;
             txtCreated.ReadOnly = true;
@@ -78,13 +78,11 @@
             if (dtRecipes.Columns.Contains("RecipeSequence"))
                 dtRecipes.Columns["RecipeSequence"].ColumnName = "Sequence";
             dtRecipes.Columns["CookbookId"].DefaultValue = PrimaryKeyId;
-
             gCookbookRecipes.Columns.Clear();
             gCookbookRecipes.DataSource = dtRecipes;
-            gCookbookRecipes.DataBindingComplete += Grid_DataBindingComplete;
             WindowsFormsUtility.FormatGridForEdit(gCookbookRecipes, "CookbookRecipe");
             WindowsFormsUtility.AddComboBoxToGrid(gCookbookRecipes, DataMaintenance.GetDataList("Recipe"), "RecipeName", "Recipe");
-
+            gCookbookRecipes.DataBindingComplete += Grid_DataBindingComplete;
             if (!gCookbookRecipes.Columns.Contains(DeleteCol))
             {
                 var del = new DataGridViewButtonColumn
@@ -125,25 +123,38 @@
 
         private void Grid_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
         {
-            gCookbookRecipes.Columns["RecipeCombo"].DisplayIndex = 0;
-            gCookbookRecipes.Columns["Sequence"].DisplayIndex = 1;
-            gCookbookRecipes.Columns[DeleteCol].DisplayIndex =
-                gCookbookRecipes.Columns.Count - 1;
+            var combo = gCookbookRecipes.Columns["RecipeCombo"];
+            if (combo != null)
+                combo.DisplayIndex = 0;
 
-            int delIdx = gCookbookRecipes.Columns[DeleteCol].Index;
-            foreach (DataGridViewRow row in gCookbookRecipes.Rows)
+            var seq = gCookbookRecipes.Columns["Sequence"];
+            if (seq != null)
+                seq.DisplayIndex = 1;
+
+            var delCol = gCookbookRecipes.Columns[DeleteCol];
+            if (delCol != null)
+                delCol.DisplayIndex = gCookbookRecipes.Columns.Count - 1;
+
+            int delIdx = delCol?.Index ?? -1;
+            if (delIdx >= 0)
             {
-                var drv = row.DataBoundItem as DataRowView;
-                bool canDelete = drv != null && drv.Row.RowState == DataRowState.Unchanged;
+                foreach (DataGridViewRow row in gCookbookRecipes.Rows)
+                {
+                    var drv = row.DataBoundItem as DataRowView;
+                    bool canDelete = drv != null
+                                     && drv.Row.RowState == DataRowState.Unchanged;
 
-                var cell = (DataGridViewButtonCell)row.Cells[delIdx];
-                cell.ReadOnly = !canDelete;
-                cell.Style.ForeColor = canDelete ? Color.Black : Color.Gray;
-                cell.Style.BackColor = canDelete
-                    ? gCookbookRecipes.DefaultCellStyle.BackColor
-                    : SystemColors.Control;
-                cell.Style.SelectionBackColor = cell.Style.BackColor;
-                cell.Value = canDelete ? "X" : "";
+                    var cell = (DataGridViewButtonCell)row.Cells[delIdx];
+                    cell.ReadOnly = !canDelete;
+                    cell.Style.ForeColor =
+                        canDelete ? Color.Black : Color.Gray;
+                    cell.Style.BackColor =
+                        canDelete
+                          ? gCookbookRecipes.DefaultCellStyle.BackColor
+                          : SystemColors.Control;
+                    cell.Style.SelectionBackColor = cell.Style.BackColor;
+                    cell.Value = canDelete ? "X" : "";
+                }
             }
         }
 
@@ -168,43 +179,56 @@
             }
         }
 
-        private void BtnSaveRecipe_Click(object s, EventArgs e)
+        private void SaveAll_Click(object sender, EventArgs e)
         {
-            foreach (DataRow r in dtRecipes.Rows.Cast<DataRow>()
-                     .Where(r => r.RowState == DataRowState.Added
-                                 && !r.IsNull("Sequence")))
-                r["CookbookId"] = PrimaryKeyId;
+            try
+            {
+                // ─── 1) Save the cookbook header ───────────────────────────
+                // if it’s new, let the proc set GETDATE()
+                if (dtCookbook.Rows[0]["Created"] == DBNull.Value)
+                    dtCookbook.Rows[0]["Created"] = DBNull.Value;
 
-            CookbookRecipe.Save(dtRecipes);
-            dtRecipes.AcceptChanges();
-            UpdateDeleteButtons();
+                cookbook.SaveCookbook(dtCookbook);       // will throw on failure
+                dtCookbook.AcceptChanges();
+                PrimaryKeyId = SQLUtility.GetValueFromFirstRowAsInt(
+                                  dtCookbook, "CookbookId"
+                              );
 
-            MessageBox.Show(
-                "Cookbook recipes saved!",
-                "Save",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
-            );
-        }
+                // ─── 2) Stamp any new recipe rows with that FK ─────────────
+                dtRecipes.Columns["CookbookId"].DefaultValue = PrimaryKeyId;
+                foreach (DataRow r in dtRecipes.Rows
+                                           .Cast<DataRow>()
+                                           .Where(r => r.RowState == DataRowState.Added))
+                {
+                    r["CookbookId"] = PrimaryKeyId;
+                }
 
-        private void BtnSave_Click(object s, EventArgs e)
-        {
-            if (dtCookbook.Rows[0]["Created"] == DBNull.Value)
-                dtCookbook.Rows[0]["Created"] = DateTime.Now;
+                // ─── 3) Save the recipes ───────────────────────────────────
+                CookbookRecipe.Save(dtRecipes);         // will throw on failure
+                dtRecipes.AcceptChanges();
+                UpdateDeleteButtons();
 
-            cookbook.SaveCookbook(dtCookbook);
-            dtCookbook.AcceptChanges();
-            PrimaryKeyId = SQLUtility.GetValueFromFirstRowAsInt(dtCookbook, "CookbookId");
+                // ─── 4) Reload everything and update UI ────────────────────
+                LoadCookbook();
+                LoadRecipesGrid();
+                UpdateButtons();
 
-            LoadCookbook();
-            LoadRecipesGrid();
-            MessageBox.Show(
-                "Cookbook saved!",
-                "Save",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
-            );
-            UpdateButtons();
+                MessageBox.Show(
+                    "Saved!",
+                    "Save",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Error saving data:\n" + ex.Message,
+                    "Save Failed",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
         }
 
         private void BtnDelete_Click(object s, EventArgs e)
@@ -240,7 +264,7 @@
 
         protected override bool SaveData()
         {
-            BtnSave_Click(this, EventArgs.Empty);
+            SaveAll_Click(this, EventArgs.Empty);
             return PrimaryKeyId != 0;
         }
     }

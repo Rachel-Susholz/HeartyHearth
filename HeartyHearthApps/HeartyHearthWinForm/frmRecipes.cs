@@ -26,6 +26,8 @@
             btnChangeStatus.Click += BtnChangeStatus_Click;
             btnSaveIngredients.Click += BtnSaveIngredients_Click;
             btnSaveSteps.Click += BtnSaveSteps_Click;
+            gIngredients.CellContentClick += gIngredients_CellContentClick;
+            gSteps.CellContentClick += gSteps_CellContentClick;
             FormClosing += FrmRecipeInfo_FormClosing;
             Shown += (s, e) => { if (IsFreshClone) btnDelete.Enabled = false; };
             lstUserName.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -104,7 +106,6 @@
             gIngredients.Columns[deleteColName].DisplayIndex = 4;
 
             gIngredients.RowsAdded += (s, e) => btnSaveIngredients.Enabled = true;
-            gIngredients.CellContentClick += gIngredients_CellContentClick;
         }
 
         private void BtnSaveIngredients_Click(object sender, EventArgs e)
@@ -126,7 +127,7 @@
                 MessageBox.Show("Ingredients saved!", "Save",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 dtrecipeingredient.AcceptChanges();
-                btnSaveIngredients.Enabled = true;
+                btnSaveIngredients.Enabled = false;
             }
             catch (Exception ex)
             {
@@ -179,25 +180,18 @@
 
             if (gSteps.Columns.Contains("DirectionSequence"))
                 gSteps.Columns["DirectionSequence"].HeaderText = "Sequence";
+ 
 
-            gSteps.EditMode = DataGridViewEditMode.EditOnEnter;
-            gSteps.AllowUserToAddRows = true; 
         }
 
-        private void GSteps_DefaultValuesNeeded(object sender, DataGridViewRowEventArgs e)
-        {
-            if (!e.Row.IsNewRow) return;
-            foreach (DataGridViewCell cell in e.Row.Cells)
-            {
-                cell.ReadOnly = false;
-                cell.Style.BackColor = SystemColors.Window;
-            }
-        }
 
         private void BtnSaveSteps_Click(object sender, EventArgs e)
         {
             try
             {
+                foreach (DataRow r in dtrecipesteps.Rows)
+                    if (r.RowState == DataRowState.Added)
+                        r["RecipeId"] = PrimaryKeyId;
                 RecipeStep.Save(dtrecipesteps);
                 foreach (DataRow dr in dtrecipesteps.Select(
                     null, null, DataViewRowState.Deleted))
@@ -209,9 +203,8 @@
                 }
                 MessageBox.Show("Steps saved!", "Save",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadRecipeSteps();
+                dtrecipesteps.AcceptChanges();
 
-                // and disable the save button until a new edit happens
                 btnSaveSteps.Enabled = false;
             }
             catch (Exception ex)
