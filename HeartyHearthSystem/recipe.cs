@@ -71,15 +71,6 @@
             SQLUtility.ExecuteSQL(cmd);
         }
 
-        public static bool RecipeNameExists(string recipeName)
-        {
-            DataTable dt = RunStoredProc("RecipeNameAndIdGet", cmd =>
-            {
-                SQLUtility.SetParamValue(cmd, "@RecipeName", recipeName);
-                SQLUtility.SetParamValue(cmd, "@All", 0);
-            });
-            return dt.Rows.Count > 0;
-        }
 
         public static void ChangeStatus(int recipeId, string newStatus)
         {
