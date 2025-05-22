@@ -1,4 +1,4 @@
---AS Try combining this sproc with the regular get sproc for improvement.
+
 create or alter procedure RecipeListGet
 as 
 begin 

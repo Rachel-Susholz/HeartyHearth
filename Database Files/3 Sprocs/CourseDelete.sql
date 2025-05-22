@@ -1,4 +1,4 @@
-create or alter procedure dbo.CourseTypeDelete(
+create or alter procedure dbo.CourseDelete(
     @CourseTypeId int,
     @Message varchar(500) = '' output
 )

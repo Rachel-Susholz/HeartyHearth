@@ -1,34 +1,29 @@
-create or alter procedure MealListGet
+create or alter proc dbo.MealListGet
 as
 begin
-    select 
-         m.mealid,
-         m.mealname,
-         sm.username as [user],
---AS It would be nicer code to just have a regular select statement and use distict's to get the correct sum's.
-         isnull((
-             select sum(r.calories)
-             from courserecipe cr
-             join mealcourse mc on cr.mealcourseid = mc.mealcourseid
-             join recipe r on cr.recipeid = r.recipeid
-             where mc.mealid = m.mealid
-         ), 0) as numcalories,
-         isnull((
-             select count(*) 
-             from mealcourse mc 
-             where mc.mealid = m.mealid
-         ), 0) as numcourses,
-         isnull((
-             select count(*) 
-             from courserecipe cr
-             join mealcourse mc on cr.mealcourseid = mc.mealcourseid
-             where mc.mealid = m.mealid
-         ), 0) as numrecipes
-    from meal m
-    join staffmember sm on m.staffmemberid = sm.staffmemberid
-    order by m.mealname;
+    select
+        m.MealId,
+        m.MealName,
+        sm.UserName as [User],
+        sum(ISNULL(r.Calories, 0)) as NumCalories,
+        count(distinct mc.MealCourseId) as NumCourses,
+        count(distinct cr.RecipeId) as NumRecipes
+    from dbo.Meal as m
+    inner join dbo.StaffMember as sm
+    on m.StaffMemberId = sm.StaffMemberId
+    left join dbo.MealCourse as mc
+    on mc.MealId = m.MealId
+    left join dbo.CourseRecipe as cr
+    on cr.MealCourseId = mc.MealCourseId
+    left join dbo.Recipe as r
+    on r.RecipeId = cr.RecipeId
+    group by
+        m.MealId,
+        m.MealName,
+        sm.UserName
+    order by
+        m.MealName;
 end;
 go
 
-exec mealListget;
-
+exec dbo.MealListGet;

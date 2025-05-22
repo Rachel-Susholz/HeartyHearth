@@ -16,25 +16,11 @@ begin
     from StaffMember
     where StaffMemberId = @StaffMemberId;
 
---AS This case will never happen since a cookbook always has a user and firstname and lastname can't be null in the user table.
-    if @FirstName is null or @LastName is null 
-    begin 
-        raiserror ('User not found.', 16, 1);
-        return;
-    end
-
     set @CookbookName = 'Recipes by ' + @FirstName + ' ' + @LastName;
 
     select @RecipeCount = count(*)
     from Recipe
     where StaffMemberId = @StaffMemberId;
-
---AS We want to allow creating a cookbook for a user even if they don't have any recipes, then just create the book without the recipes.
-    if @RecipeCount = 0
-    begin
-        raiserror('No recipes found for this user.', 16, 1);
-        return;
-    end
 
     set @Price = @RecipeCount * 1.33;
 
