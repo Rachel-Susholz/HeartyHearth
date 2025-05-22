@@ -21,6 +21,14 @@ namespace HeartyHearthWinForm
 
         protected override void OnShown(EventArgs e)
         {
+            frmLogin f = new() {StartPosition = FormStartPosition.CenterParent};
+            bool b = f.ShowLogin();
+            if (b == false)
+            {
+                this.Close();
+                Application.Exit();
+                return;
+            }
             base.OnShown(e);
             OpenForm(typeof(frmDashboard));
         }

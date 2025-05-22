@@ -5,6 +5,8 @@
 
 # Secret files
 *create-login.sql
+*secret.config
+*ddl.secret.config
 
 # User-specific files
 *.rsuser

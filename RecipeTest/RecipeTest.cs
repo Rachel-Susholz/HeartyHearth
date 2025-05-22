@@ -1,24 +1,38 @@
-using HeartyHearthSystem;
+using System.Configuration;
 using System.Data;
+using System.Data.SqlClient;
 
 namespace RecipeTest
 {
     public class Tests
     {
+        string connstring = ConfigurationManager.ConnectionStrings["liveconn"].ConnectionString;
+        string testconnstring = ConfigurationManager.ConnectionStrings["unittestconn"].ConnectionString;
+        //"Server=.\SQLExpress;Database=HeartyHearthDB;Trusted_Connection=true"
+
         [SetUp]
         public void SetConnectionString()
         {
-           DBManager.SetConnectionString("Server=tcp:dev-rochelsusholz.database.windows.net,1433; Initial Catalog=HeartyHearthDB;Persist Security Info=False;User ID=rsadmin;Password=Rochel@9225; MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30");
+           
+           DBManager.SetConnectionString(connstring, true);
+
         }
 
-           
+        private DataTable GetDataTable(string sql)
+        {
+            DataTable dt = new();
+            DBManager.SetConnectionString(testconnstring, false);
+            dt = SQLUtility.GetDataTable(sql);
+            DBManager.SetConnectionString(connstring, false);
+            return dt;
+        }
 
             [Test]
         public void TestLoadRecipe()
         {
             // Arrange
 
-            int recipeId = TestHelper.GetMaxRecipeId();
+            int recipeId = GetMaxRecipeId();
             Console.WriteLine($"Before Test: Load recipe with RecipeId: {recipeId}");
 
             // Act
@@ -44,16 +58,16 @@ namespace RecipeTest
             dt.Rows.Add();
             DataRow row = dt.Rows[0];
             row["RecipeName"] = uniqueName;
-            row["CuisineId"] = TestHelper.GetValidCuisineId();
+            row["CuisineId"] = GetValidCuisineId();
             row["Calories"] = 200;
             row["Drafted"] = DateTime.Now;
-            row["StaffMemberId"] = TestHelper.GetValidStaffMemberId();
+            row["StaffMemberId"] = GetValidStaffMemberId();
 
             // Act
             recipe.Save(dt);
 
             // Reload the most recent recipe
-            DataTable allRecipes = recipe.Load(TestHelper.GetMaxRecipeId());
+            DataTable allRecipes = recipe.Load(GetMaxRecipeId());
 
             // Assert
             DataRow insertedRow = allRecipes.Rows[0]; 
@@ -67,17 +81,17 @@ namespace RecipeTest
         {
             // Arrange
    
-            string existingName = TestHelper.GetFirstColumnFirstRowValueAsString("select top 1 r.RecipeName from recipe r");
+            string existingName = GetFirstColumnFirstRowValueAsString("select top 1 r.RecipeName from recipe r");
             TestContext.WriteLine($"Inserting recipe with existing name: {existingName}");
 
             DataTable newdt = recipe.Load(0); // Load an empty DataTable for a new recipe.
             newdt.Rows.Add();
             DataRow row = newdt.Rows[0];
             row["RecipeName"] = existingName;
-            row["CuisineId"] = TestHelper.GetValidCuisineId();
+            row["CuisineId"] = GetValidCuisineId();
             row["Calories"] = 200;
             row["Drafted"] = DateTime.Now;
-            row["StaffMemberId"] = TestHelper.GetValidStaffMemberId();
+            row["StaffMemberId"] = GetValidStaffMemberId();
 
 
             //Assert
@@ -94,7 +108,7 @@ namespace RecipeTest
         
         {
             // Arrange
-            int recipeId = TestHelper.GetMaxRecipeId();
+            int recipeId = GetMaxRecipeId();
             //this may fail if there are related tables but it does work. you can first run the test to
             //insert a record with a unique name and then run the delete and it should work.
             Console.WriteLine($"Before Test: Delete recipe with RecipeId: {recipeId}");
@@ -115,8 +129,8 @@ namespace RecipeTest
 
         {
             // Arrange
-            DataTable dt = SQLUtility.GetDataTable("select top 1 r.RecipeId, r.RecipeName from Recipe r join RecipeIngredient ri on r.RecipeId = ri.RecipeId");
-            int recipeId = TestHelper.GetMaxRecipeId();
+            DataTable dt = GetDataTable("select top 1 r.RecipeId, r.RecipeName from Recipe r join RecipeIngredient ri on r.RecipeId = ri.RecipeId");
+            int recipeId = GetMaxRecipeId();
             string recipename = "";
             if (dt.Rows.Count > 0)
             {
@@ -138,9 +152,9 @@ namespace RecipeTest
         public void TestDeleteRecipeWithBusinessRule()
         {
             // Arrange
-            DataTable dt = SQLUtility.GetDataTable(
+            DataTable dt = GetDataTable(
                 "select top 1 * from recipe r  where" +
-    "((r.RecipeStatus = 'Archived' and datediff(day, r.Archived, getdate()) < 30) or r.RecipeStatus = 'Published')");
+                "((r.RecipeStatus = 'Archived' and datediff(day, r.Archived, getdate()) < 30) or r.RecipeStatus = 'Published')");
 
             int recipeId = 0;
             string recipeName = "";
@@ -211,7 +225,7 @@ namespace RecipeTest
         public void UpdateRecipeNameTest()
         {
             // Arrange
-            int recipeId = TestHelper.GetMaxRecipeId(); 
+            int recipeId = GetMaxRecipeId(); 
             DataTable dtRecipe = recipe.Load(recipeId);
             string originalRecipeName = dtRecipe.Rows[0]["RecipeName"].ToString();
             string updatedRecipeName =  originalRecipeName + "_updated";
@@ -234,7 +248,7 @@ namespace RecipeTest
         public void UpdateRecipeNameToBlankTest()
         {
            
-            int recipeId = TestHelper.GetMaxRecipeId();
+            int recipeId = GetMaxRecipeId();
             DataTable dtRecipe = recipe.Load(recipeId);
             string originalRecipeName = dtRecipe.Rows[0]["RecipeName"].ToString();
             string updatedRecipeName = "";
@@ -253,10 +267,10 @@ namespace RecipeTest
         public void ChangeCuisineTypeTest()
         {
             // Arrange
-            int recipeId = TestHelper.GetMaxRecipeId();
+            int recipeId = GetMaxRecipeId();
             DataTable dtRecipe = recipe.Load(recipeId);
             int originalCuisineId = (int)dtRecipe.Rows[0]["CuisineId"];
-            int newCuisineId = TestHelper.GetValidCuisineId();
+            int newCuisineId = GetValidCuisineId();
 
             // Log current state
             TestContext.WriteLine($"Before Test: Original CuisineId: {originalCuisineId}");
@@ -276,7 +290,7 @@ namespace RecipeTest
         public void ChangeCaloriesTest()
         {
             // Arrange
-            int recipeId = TestHelper.GetMaxRecipeId();
+            int recipeId = GetMaxRecipeId();
             DataTable dtRecipe = recipe.Load(recipeId);
             int originalCalories = (int)dtRecipe.Rows[0]["Calories"];
             int newCalories = originalCalories + 50; 
@@ -300,10 +314,10 @@ namespace RecipeTest
         public void ChangeUserNameTest()
         {
             // Arrange
-            int recipeId = TestHelper.GetMaxRecipeId();
+            int recipeId = GetMaxRecipeId();
             DataTable dtRecipe = recipe.Load(recipeId);
             int originalStaffMemberId = (int)dtRecipe.Rows[0]["StaffMemberId"];
-            int newStaffMemberId = TestHelper.GetValidStaffMemberId(); 
+            int newStaffMemberId = GetValidStaffMemberId(); 
 
             // Log current state
             TestContext.WriteLine($"Before Test: Original StaffMemberId: {originalStaffMemberId}");
@@ -319,7 +333,50 @@ namespace RecipeTest
             Assert.IsTrue(updatedStaffMemberId == newStaffMemberId, "User name was not updated correctly.");
         }
 
+        //Helper functions 
+        public int GetMaxId(string tableName, string columnName)
+        {
+            DBManager.SetConnectionString(testconnstring, false);
+            string sql = $"select max({columnName}) from {tableName}";
+            DataTable result = SQLUtility.ExecuteSQL(sql);
 
+            if (result.Rows.Count > 0 && result.Rows[0][0] != DBNull.Value)
+            {
+                return (int)result.Rows[0][0];
+            }
+            else
+            {
+                return 0; 
+            }
+            DBManager.SetConnectionString(connstring, false);
+        }
+
+        public int GetMaxRecipeId()
+        {
+            return GetMaxId("recipe", "recipeid");
+        }
+
+        public int GetValidCuisineId()
+        {
+            return GetMaxId("recipe", "CuisineId");
+        }
+
+        public int GetValidStaffMemberId()
+        {
+            return GetMaxId("recipe", "StaffmemberId");
+        }
+        private string GetFirstColumnFirstRowValueAsString(string query)
+        {
+            SQLUtility.ConnectionString = testconnstring;
+
+            DataTable dt = GetDataTable(query);
+
+            SQLUtility.ConnectionString = connstring;
+
+            return (dt.Rows.Count > 0)
+                 ? dt.Rows[0][0]?.ToString() ?? ""
+                 : "";
+        }
 
 
 
